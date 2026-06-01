@@ -1,0 +1,123 @@
+<h2>파트너 배정 알고리즘 선택</h2>
+<p class="subtitle">주최자 마감 화면에서 배정 방식을 고릅니다. 어떤 방식이 더 자연스러운가요?</p>
+
+<div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:20px; align-items:flex-start;">
+
+  <!-- Mockup: 마감 화면 -->
+  <div style="flex:0 0 220px;">
+    <div class="label" style="text-align:center; margin-bottom:8px;">주최자 마감 화면</div>
+    <div class="mockup" style="padding:16px;">
+      <div class="mockup-header">🔒 파트너 배정</div>
+      <div class="mockup-body" style="padding:12px;">
+        <div style="font-size:11px; font-weight:600; margin-bottom:12px;">배정 방식 선택</div>
+
+        <!-- Option A -->
+        <div id="opt-snake" onclick="selectAlgo('snake')"
+          style="cursor:pointer; border:2px solid #1565c0; border-radius:8px; padding:10px; margin-bottom:8px; background:#e3f2fd;">
+          <div style="font-size:11px; font-weight:700; color:#1565c0; margin-bottom:4px;">● 스네이크 드래프트</div>
+          <div style="font-size:10px; color:#555;">
+            레이팅 순 정렬 후<br>1위↔꼴찌, 2위↔꼴찌-1…<br>
+            <span style="color:#1565c0;">결정적, 예측 가능</span>
+          </div>
+        </div>
+
+        <!-- Option B -->
+        <div id="opt-group" onclick="selectAlgo('group')"
+          style="cursor:pointer; border:2px solid #ddd; border-radius:8px; padding:10px; margin-bottom:16px; background:#fafafa;">
+          <div style="font-size:11px; font-weight:700; color:#555; margin-bottom:4px;">○ 그룹 랜덤</div>
+          <div style="font-size:10px; color:#555;">
+            상위/하위 그룹 분리 후<br>그룹 내 랜덤 매칭<br>
+            <span style="color:#888;">매번 결과가 달라짐</span>
+          </div>
+        </div>
+
+        <button class="mock-button" style="width:100%; background:#1565c0; color:#fff; border:none; font-size:12px;">
+          배정 시작
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 알고리즘 설명 -->
+  <div style="flex:1; min-width:260px;">
+
+    <!-- Snake Draft 설명 -->
+    <div style="margin-bottom:20px;">
+      <div class="label" style="margin-bottom:8px;">스네이크 드래프트 — 예시 (8명)</div>
+      <div style="font-size:11px; background:#f5f5f5; border-radius:8px; padding:12px; font-family:monospace;">
+        <div style="color:#888; margin-bottom:8px;">레이팅 내림차순 정렬:</div>
+        <div>1위 김철수  25.50 ──┐</div>
+        <div>2위 이영희  22.00 ──┼──┐</div>
+        <div>3위 박민준  18.75 ──┼──┼──┐</div>
+        <div>4위 정다은  15.00 ──┼──┼──┼──┐</div>
+        <div>5위 최지수   9.50 ──┘  │  │  │</div>
+        <div>6위 홍길동   7.20 ─────┘  │  │</div>
+        <div>7위 강민서   5.80 ────────┘  │</div>
+        <div>8위 윤지호   3.10 ───────────┘</div>
+        <div style="color:#1565c0; margin-top:8px;">
+          팀1: 김철수+최지수 (25.50+9.50)<br>
+          팀2: 이영희+홍길동 (22.00+7.20)<br>
+          팀3: 박민준+강민서 (18.75+5.80)<br>
+          팀4: 정다은+윤지호 (15.00+3.10)
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Random 설명 -->
+    <div>
+      <div class="label" style="margin-bottom:8px;">그룹 랜덤 — 예시 (8명 → 4팀)</div>
+      <div style="font-size:11px; background:#f5f5f5; border-radius:8px; padding:12px; font-family:monospace;">
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1;">
+            <div style="color:#e65100; font-weight:700; margin-bottom:6px;">상위 그룹 (4명)</div>
+            <div>김철수  25.50</div>
+            <div>이영희  22.00</div>
+            <div>박민준  18.75</div>
+            <div>정다은  15.00</div>
+          </div>
+          <div style="flex:1;">
+            <div style="color:#1565c0; font-weight:700; margin-bottom:6px;">하위 그룹 (4명)</div>
+            <div>최지수   9.50</div>
+            <div>홍길동   7.20</div>
+            <div>강민서   5.80</div>
+            <div>윤지호   3.10</div>
+          </div>
+        </div>
+        <div style="color:#43a047; margin-top:8px;">
+          🔀 랜덤 매칭:<br>
+          팀1: 박민준 + 홍길동<br>
+          팀2: 이영희 + 윤지호<br>
+          팀3: 김철수 + 강민서<br>
+          팀4: 정다은 + 최지수
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectAlgo(type) {
+  var snake = document.getElementById('opt-snake');
+  var group = document.getElementById('opt-group');
+  if (type === 'snake') {
+    snake.style.border = '2px solid #1565c0';
+    snake.style.background = '#e3f2fd';
+    snake.querySelector('div').style.color = '#1565c0';
+    snake.querySelector('div').innerHTML = '● 스네이크 드래프트';
+    group.style.border = '2px solid #ddd';
+    group.style.background = '#fafafa';
+    group.querySelector('div').style.color = '#555';
+    group.querySelector('div').innerHTML = '○ 그룹 랜덤';
+  } else {
+    group.style.border = '2px solid #1565c0';
+    group.style.background = '#e3f2fd';
+    group.querySelector('div').style.color = '#1565c0';
+    group.querySelector('div').innerHTML = '● 그룹 랜덤';
+    snake.style.border = '2px solid #ddd';
+    snake.style.background = '#fafafa';
+    snake.querySelector('div').style.color = '#555';
+    snake.querySelector('div').innerHTML = '○ 스네이크 드래프트';
+  }
+}
+</script>

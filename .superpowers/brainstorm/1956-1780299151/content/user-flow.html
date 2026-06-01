@@ -1,0 +1,89 @@
+<h2>화면 흐름 (User Flow)</h2>
+<p class="subtitle">QR 스캔부터 파트너 확인까지 전체 흐름입니다. 괜찮으면 다음 단계로 넘어가겠습니다.</p>
+
+<div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
+
+  <!-- Screen 1 -->
+  <div style="flex:1; min-width:160px; max-width:200px;">
+    <div class="label" style="text-align:center; margin-bottom:8px;">① 참가자 — QR 스캔 후</div>
+    <div class="mockup" style="padding:16px; min-height:280px;">
+      <div class="mockup-header">Unidarts</div>
+      <div class="mockup-body" style="padding:12px; text-align:center;">
+        <div style="font-size:13px; font-weight:600; margin-bottom:16px;">이름과 레이팅을 입력하세요</div>
+        <input class="mock-input" placeholder="이름" style="display:block; width:100%; margin-bottom:8px; box-sizing:border-box;">
+        <input class="mock-input" placeholder="레이팅 (0.00 ~ 30.00)" style="display:block; width:100%; margin-bottom:16px; box-sizing:border-box;">
+        <button class="mock-button" style="width:100%">등록하기</button>
+        <div style="margin-top:16px; font-size:11px; color:#888;">현재 등록: 7명</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex; align-items:center; font-size:24px; color:#888; padding-top:32px;">→</div>
+
+  <!-- Screen 2 -->
+  <div style="flex:1; min-width:160px; max-width:200px;">
+    <div class="label" style="text-align:center; margin-bottom:8px;">② 등록 완료 후</div>
+    <div class="mockup" style="padding:16px; min-height:280px;">
+      <div class="mockup-header">Unidarts</div>
+      <div class="mockup-body" style="padding:12px; text-align:center;">
+        <div style="font-size:28px; margin:16px 0;">✓</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">등록 완료!</div>
+        <div style="font-size:11px; color:#888; margin-bottom:16px;">김철수 (25.50)</div>
+        <div style="font-size:11px; background:#f0f4ff; border-radius:8px; padding:10px;">
+          주최자가 수집을 마감하면<br>파트너가 배정됩니다
+        </div>
+        <div style="margin-top:16px; font-size:11px; color:#888;">현재 등록: 8명</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex; align-items:center; font-size:24px; color:#888; padding-top:32px;">→</div>
+
+  <!-- Screen 3: Admin -->
+  <div style="flex:1; min-width:160px; max-width:200px;">
+    <div class="label" style="text-align:center; margin-bottom:8px;">③ 주최자 — 로고 길게 누른 후</div>
+    <div class="mockup" style="padding:16px; min-height:280px;">
+      <div class="mockup-header">🔒 주최자 모드</div>
+      <div class="mockup-body" style="padding:12px;">
+        <div style="font-size:11px; font-weight:600; margin-bottom:8px;">등록 현황 (8명)</div>
+        <div style="font-size:10px; color:#555; margin-bottom:4px;">김철수 — 25.50</div>
+        <div style="font-size:10px; color:#555; margin-bottom:4px;">이영희 — 22.00</div>
+        <div style="font-size:10px; color:#555; margin-bottom:4px;">박민준 — 18.75</div>
+        <div style="font-size:10px; color:#888; margin-bottom:12px;">... 5명 더</div>
+        <button class="mock-button" style="width:100%; background:#e53935; color:#fff; border:none; margin-bottom:8px;">수집 마감 → 파트너 배정</button>
+        <button class="mock-button" style="width:100%; font-size:10px;">참가자 삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex; align-items:center; font-size:24px; color:#888; padding-top:32px;">→</div>
+
+  <!-- Screen 4: Results -->
+  <div style="flex:1; min-width:160px; max-width:200px;">
+    <div class="label" style="text-align:center; margin-bottom:8px;">④ 파트너 결과 화면</div>
+    <div class="mockup" style="padding:16px; min-height:280px;">
+      <div class="mockup-header">Unidarts — 결과</div>
+      <div class="mockup-body" style="padding:12px;">
+        <input class="mock-input" placeholder="이름 검색..." style="display:block; width:100%; margin-bottom:12px; box-sizing:border-box; font-size:11px;">
+        <div style="font-size:10px; font-weight:600; color:#555; margin-bottom:8px;">전체 팀 목록</div>
+        <div style="background:#e8f5e9; border-radius:6px; padding:8px; margin-bottom:6px; font-size:10px;">
+          <b>1팀</b> 김철수 (25.50) + 홍길동 (4.20)
+        </div>
+        <div style="background:#e8f5e9; border-radius:6px; padding:8px; margin-bottom:6px; font-size:10px;">
+          <b>2팀</b> 이영희 (22.00) + 최지수 (6.80)
+        </div>
+        <div style="background:#e8f5e9; border-radius:6px; padding:8px; font-size:10px;">
+          <b>3팀</b> 박민준 (18.75) + 정다은 (9.50)
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:24px; padding:12px; background:#fffde7; border-radius:8px; font-size:12px; color:#555;">
+  <b>파트너 배정 알고리즘:</b> 레이팅 내림차순 정렬 후 1위 ↔ 꼴찌, 2위 ↔ 꼴찌-1, ... 식으로 짝짓기 (Snake Draft)
+</div>
