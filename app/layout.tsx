@@ -25,6 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       {/* 깜빡임 방지: hydration 전에 테마 속성 적용 */}
