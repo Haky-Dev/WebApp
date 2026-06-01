@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminPinModal from '@/components/admin/AdminPinModal'
 import type { TournamentEvent } from '@/lib/types'
@@ -58,7 +58,7 @@ export default function HomePage() {
   const [error, setError] = useState('')
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [adminTarget, setAdminTarget] = useState<string | null>(null)
-  const [pressTimer, setPressTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     fetch('/api/events').then(r => r.json()).then(setEvents)
@@ -86,11 +86,10 @@ export default function HomePage() {
   }
 
   function startPress() {
-    const t = setTimeout(() => setIsAdminMode(m => !m), 3000)
-    setPressTimer(t)
+    pressTimer.current = setTimeout(() => setIsAdminMode(m => !m), 3000)
   }
   function endPress() {
-    if (pressTimer) clearTimeout(pressTimer)
+    if (pressTimer.current) clearTimeout(pressTimer.current)
   }
 
   return (
