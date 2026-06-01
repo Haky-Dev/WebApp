@@ -4,9 +4,10 @@ import { useState } from 'react'
 interface Props {
   eventId: string
   onSuccess: (token: string) => void
+  onCancel?: () => void
 }
 
-export default function AdminPinModal({ eventId, onSuccess }: Props) {
+export default function AdminPinModal({ eventId, onSuccess, onCancel }: Props) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,25 +28,35 @@ export default function AdminPinModal({ eventId, onSuccess }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 w-80 space-y-4">
-        <h2 className="font-bold text-lg text-center">관리자 인증</h2>
+    <div className="modal-overlay">
+      <form onSubmit={handleSubmit} className="modal-panel" style={{ borderTop: '2px solid var(--neon-green)' }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+          🔒 주최자 인증
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 18 }}>
+          PIN 번호를 입력하세요
+        </div>
+        <label className="field-label">PIN</label>
         <input
           type="password"
-          className="w-full border rounded px-3 py-2"
-          placeholder="PIN 입력"
+          className="input-field"
+          style={{ marginBottom: 12, letterSpacing: '6px' }}
+          placeholder="••••"
           value={pin}
           onChange={e => setPin(e.target.value)}
           autoFocus
         />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-        >
+        {error && (
+          <p style={{ color: 'var(--accent-danger)', fontSize: 12, fontWeight: 700, marginBottom: 12 }}>{error}</p>
+        )}
+        <button type="submit" disabled={loading} className="btn-cta" style={{ marginBottom: onCancel ? 10 : 0 }}>
           {loading ? '확인 중...' : '확인'}
         </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="btn-ghost" style={{ width: '100%' }}>
+            취소
+          </button>
+        )}
       </form>
     </div>
   )
