@@ -17,15 +17,8 @@ export default function ExpectedList({ token, eventId }: Props) {
   async function add(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    const res = await fetch('/api/admin/expected', {
-      method: 'POST', headers,
-      body: JSON.stringify({ name }),
-    })
-    if (res.ok) {
-      const item = await res.json()
-      setList(l => [...l, item])
-      setName('')
-    }
+    const res = await fetch('/api/admin/expected', { method: 'POST', headers, body: JSON.stringify({ name }) })
+    if (res.ok) { const item = await res.json(); setList(l => [...l, item]); setName('') }
   }
 
   async function remove(id: string) {
@@ -34,22 +27,36 @@ export default function ExpectedList({ token, eventId }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={add} className="flex gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <form onSubmit={add} style={{ display: 'flex', gap: 8 }}>
         <input
-          className="flex-1 border rounded px-3 py-2"
+          className="input-field"
+          style={{ flex: 1 }}
           placeholder="예상 참가자 이름"
           value={name}
           onChange={e => setName(e.target.value)}
         />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">추가</button>
+        <button type="submit" className="btn-secondary">추가</button>
       </form>
-      <p className="text-sm text-gray-500">{list.length}명 등록됨</p>
-      <ul className="space-y-2">
+
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700 }}>
+        {list.length}명 등록됨
+      </p>
+
+      <ul style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         {list.map(p => (
-          <li key={p.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-            <span>{p.name}</span>
-            <button onClick={() => remove(p.id)} className="text-gray-400 hover:text-red-500">✕</button>
+          <li
+            key={p.id}
+            className="card-surface"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px' }}
+          >
+            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}</span>
+            <button
+              onClick={() => remove(p.id)}
+              style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
+            >
+              ×
+            </button>
           </li>
         ))}
       </ul>

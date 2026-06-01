@@ -10,14 +10,21 @@ import type { Participant } from '@/lib/types'
 
 type Tab = 'expected' | 'attendance' | 'assign'
 
+const TABS: [Tab, string][] = [
+  ['expected', '명단 관리'],
+  ['attendance', '참가 확인'],
+  ['assign', '마감 / 배정'],
+]
+
 export default function AdminPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('expected')
-  const [animationPairs, setAnimationPairs] = useState<
-    { a: Participant; b: Participant }[] | null
-  >(null)
+  const [animationPairs, setAnimationPairs] = useState<{ a: Participant; b: Participant }[] | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem(`admin_token_${id}`)
@@ -33,53 +40,119 @@ export default function AdminPage() {
     router.push(`/events/${id}/results`)
   }
 
+  async function handleDelete() {
+    if (!token) return
+    setDeleting(true)
+    setDeleteError(null)
+    const res = await fetch(`/api/events/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (res.ok) {
+      localStorage.removeItem(`admin_token_${id}`)
+      router.push('/')
+    } else {
+      const data = await res.json()
+      setDeleteError(data.error ?? '삭제 실패')
+      setDeleting(false)
+    }
+  }
+
   if (animationPairs) {
-    return (
-      <AssignmentAnimation
-        pairs={animationPairs}
-        onEnd={handleAnimationEnd}
-      />
-    )
+    return <AssignmentAnimation pairs={animationPairs} onEnd={handleAnimationEnd} />
   }
 
   return (
-    <main className="max-w-lg mx-auto p-6">
-      {!token && (
-        <AdminPinModal eventId={id} onSuccess={handleTokenSet} />
-      )}
+    <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
+      <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
+        {!token && <AdminPinModal eventId={id} onSuccess={handleTokenSet} />}
 
-      <h1 className="text-xl font-bold mb-1">🔒 주최자 모드</h1>
-      <p className="text-sm text-gray-400 mb-6">Event: {id.slice(0, 8)}...</p>
+        {/* 삭제 확인 모달 */}
+        {showDeleteConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-panel" style={{ borderTop: '2px solid var(--accent-danger)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent-danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+                ⚠ 토너먼트 삭제
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>정말 삭제할까요?</div>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 20 }}>
+                참가자, 명단, 배정 결과 포함<br />모든 데이터가 삭제됩니다.
+              </p>
+              {deleteError && <p style={{ color: 'var(--accent-danger)', fontSize: 12, fontWeight: 700, marginBottom: 12 }}>{deleteError}</p>}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
+                  disabled={deleting}
+                  className="btn-ghost"
+                  style={{ flex: 1 }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="btn-danger"
+                  style={{ flex: 1 }}
+                >
+                  {deleting ? '삭제 중...' : '삭제'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-      <div className="flex border-b mb-6">
-        {([
-          ['expected', '명단 관리'],
-          ['attendance', '참가 확인'],
-          ['assign', '마감 / 배정'],
-        ] as [Tab, string][]).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`flex-1 py-2 text-sm ${tab === key
-              ? 'border-b-2 border-blue-600 font-semibold'
-              : 'text-gray-400'}`}
-          >{label}</button>
-        ))}
-      </div>
-
-      {token && (
-        <>
-          {tab === 'expected' && <ExpectedList token={token} eventId={id} />}
-          {tab === 'attendance' && <AttendanceTracker token={token} eventId={id} />}
-          {tab === 'assign' && (
-            <AssignmentPanel
-              token={token}
-              eventId={id}
-              onAssignStart={setAnimationPairs}
-            />
+        {/* 헤더 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 5 }}>
+              🔒 주최자 모드
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+              {id.slice(0, 8)}...
+            </div>
+          </div>
+          {token && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-danger)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              토너먼트 삭제
+            </button>
           )}
-        </>
-      )}
+        </div>
+
+        {/* 탭 */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+          {TABS.map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                fontSize: 12,
+                fontWeight: tab === key ? 900 : 700,
+                color: tab === key ? 'var(--accent)' : 'var(--text-muted)',
+                background: 'none',
+                border: 'none',
+                borderBottom: tab === key ? '2px solid var(--accent)' : '2px solid transparent',
+                marginBottom: -1,
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {token && (
+          <>
+            {tab === 'expected' && <ExpectedList token={token} eventId={id} />}
+            {tab === 'attendance' && <AttendanceTracker token={token} eventId={id} />}
+            {tab === 'assign' && <AssignmentPanel token={token} eventId={id} onAssignStart={setAnimationPairs} />}
+          </>
+        )}
+      </div>
     </main>
   )
 }
