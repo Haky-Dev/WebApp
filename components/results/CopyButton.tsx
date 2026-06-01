@@ -28,7 +28,8 @@ export default function CopyButton({ pairs }: Props) {
   return (
     <button
       onClick={handleCopy}
-      className="shrink-0 text-sm border rounded px-3 py-2 hover:bg-gray-50"
+      className="btn-ghost"
+      style={{ flexShrink: 0, fontSize: 13, padding: '10px 14px', whiteSpace: 'nowrap' }}
     >
       {copied ? '복사됨 ✓' : '구글 시트 복사'}
     </button>
