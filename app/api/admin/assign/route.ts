@@ -16,6 +16,17 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
   const eventId = payload.eventId
 
+  const { data: eventRecord } = await supabase
+    .from('events')
+    .select('status')
+    .eq('id', eventId)
+    .single()
+
+  if (!eventRecord) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+  if (eventRecord.status === 'closed') {
+    return NextResponse.json({ error: 'Assignment already completed' }, { status: 409 })
+  }
+
   const { data: allParticipants, error: pErr } = await supabase
     .from('participants')
     .select('*')
@@ -29,25 +40,25 @@ export async function POST(req: NextRequest) {
     participants = participants.filter(p => p.id !== excludeId)
   }
 
+  // Build local temp participant for algorithm (not yet in DB)
+  let tempParticipantRecord: Participant | null = null
   if (tempParticipant) {
-    const { data: temp, error: tErr } = await supabase
-      .from('participants')
-      .insert({
-        event_id: eventId,
-        name: tempParticipant.name,
-        club: tempParticipant.club || null,
-        rating: tempParticipant.rating,
-      })
-      .select()
-      .single()
-    if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 })
-    participants.push(temp)
+    tempParticipantRecord = {
+      id: 'temp',
+      event_id: eventId,
+      name: tempParticipant.name,
+      club: tempParticipant.club || null,
+      rating: tempParticipant.rating,
+      registered_at: new Date().toISOString(),
+    }
+    participants.push(tempParticipantRecord)
   }
 
   if (participants.length % 2 !== 0) {
     return NextResponse.json({ error: 'Odd number of participants' }, { status: 400 })
   }
 
+  // Run algorithm
   let pairs
   try {
     if (algorithm === 'snake') {
@@ -60,6 +71,26 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Algorithm error'
     return NextResponse.json({ error: msg }, { status: 400 })
+  }
+
+  // Now that algorithm succeeded, persist temp participant if needed
+  if (tempParticipantRecord) {
+    const { data: realTemp, error: tErr } = await supabase
+      .from('participants')
+      .insert({
+        event_id: eventId,
+        name: tempParticipantRecord.name,
+        club: tempParticipantRecord.club,
+        rating: tempParticipantRecord.rating,
+      })
+      .select()
+      .single()
+    if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 })
+    // Replace temp id in pairs with real DB id
+    for (const pair of pairs) {
+      if (pair.a.id === 'temp') pair.a = realTemp
+      if (pair.b.id === 'temp') pair.b = realTemp
+    }
   }
 
   const pairRows = pairs.map((p, i) => ({

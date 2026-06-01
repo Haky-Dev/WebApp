@@ -20,12 +20,12 @@ export default function AdminPage() {
   >(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('admin_token')
+    const saved = localStorage.getItem(`admin_token_${id}`)
     if (saved) setToken(saved)
   }, [])
 
   function handleTokenSet(t: string) {
-    localStorage.setItem('admin_token', t)
+    localStorage.setItem(`admin_token_${id}`, t)
     setToken(t)
   }
 
