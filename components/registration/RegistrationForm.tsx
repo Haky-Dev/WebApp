@@ -34,11 +34,11 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
-        <label className="block text-sm font-medium mb-1">이름 *</label>
+        <label className="field-label">이름 *</label>
         <input
-          className="w-full border rounded px-3 py-2"
+          className="input-field"
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="홍길동"
@@ -46,18 +46,18 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">동호회 (선택)</label>
+        <label className="field-label" style={{ color: 'var(--text-muted)' }}>동호회 (선택)</label>
         <input
-          className="w-full border rounded px-3 py-2"
+          className="input-field"
           value={club}
           onChange={e => setClub(e.target.value)}
           placeholder="한강다트클럽"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">레이팅 (0.00 ~ 30.00) *</label>
+        <label className="field-label">레이팅 (0.00 ~ 30.00) *</label>
         <input
-          className="w-full border rounded px-3 py-2"
+          className="input-field"
           type="number"
           min="0"
           max="30"
@@ -68,12 +68,8 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
           required
         />
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-      >
+      {error && <p style={{ color: 'var(--accent-danger)', fontSize: 12, fontWeight: 700 }}>{error}</p>}
+      <button type="submit" disabled={loading} className="btn-cta">
         {loading ? '등록 중...' : '등록하기'}
       </button>
     </form>
