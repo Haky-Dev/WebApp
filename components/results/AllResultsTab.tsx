@@ -35,11 +35,12 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-        {filtered.map((pair, i) => {
+        {filtered.map((pair) => {
           const highlight =
             pair.participant_a_id === highlightId ||
             pair.participant_b_id === highlightId
-          const color = teamColor(i)
+          const originalIndex = pairs.indexOf(pair)
+          const color = teamColor(originalIndex)
           return (
             <div
               key={pair.id}
