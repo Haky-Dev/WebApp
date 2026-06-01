@@ -10,6 +10,12 @@ interface Props {
 
 type Phase = 'drumroll' | 'finale'
 
+const TEAM_COLORS = ['#ff2d78', '#39ff14', '#00d4ff']
+
+function teamColor(i: number) {
+  return TEAM_COLORS[i % TEAM_COLORS.length]
+}
+
 export default function AssignmentAnimation({ pairs, onEnd }: Props) {
   const [phase, setPhase] = useState<Phase>('drumroll')
   const [currentTeam, setCurrentTeam] = useState(0)
@@ -22,18 +28,16 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
 
   useEffect(() => {
     runDrumroll(0)
-    return () => {
-      if (spinInterval.current) clearTimeout(spinInterval.current)
-    }
+    return () => { if (spinInterval.current) clearTimeout(spinInterval.current) }
   }, [])
 
   function runDrumroll(teamIdx: number) {
     if (teamIdx >= pairs.length) {
       setPhase('finale')
       setTimeout(() => {
-        confetti({ particleCount: 200, spread: 90, origin: { y: 0.5 } })
-        setTimeout(() => confetti({ particleCount: 150, spread: 120, origin: { x: 0.2, y: 0.6 } }), 400)
-        setTimeout(() => confetti({ particleCount: 150, spread: 120, origin: { x: 0.8, y: 0.6 } }), 700)
+        confetti({ particleCount: 200, spread: 90, origin: { y: 0.5 }, colors: ['#ff2d78', '#39ff14', '#00d4ff'] })
+        setTimeout(() => confetti({ particleCount: 150, spread: 120, origin: { x: 0.2, y: 0.6 }, colors: ['#ff2d78', '#39ff14'] }), 400)
+        setTimeout(() => confetti({ particleCount: 150, spread: 120, origin: { x: 0.8, y: 0.6 }, colors: ['#00d4ff', '#39ff14'] }), 700)
       }, 300)
       return
     }
@@ -42,8 +46,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
     setSpinning(true)
     setSpinName('...')
 
-    let speed = 60
-    let elapsed = 0
+    let speed = 60, elapsed = 0
     const totalDuration = 2000 + teamIdx * 200
 
     function tick() {
@@ -63,75 +66,103 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-900 text-white flex flex-col items-center justify-center">
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: '#010101',
+      color: '#f1f5f9',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden',
+    }}>
+      {/* 스캔라인 */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px)',
+        opacity: 0.3, pointerEvents: 'none', zIndex: 0,
+      }} />
+
       {phase === 'drumroll' && (
-        <div className="text-center space-y-8 px-6">
-          <p className="text-gray-400 text-lg">
-            팀 {currentTeam + 1} / {pairs.length} 배정 중...
-          </p>
-          <div className="space-y-4">
-            <div className="text-3xl font-bold text-blue-300">
+        <>
+          {/* ambient glow */}
+          <div style={{ position: 'absolute', top: -60, left: '50%', transform: 'translateX(-50%)', width: 300, height: 300, background: 'radial-gradient(circle, rgba(57,255,20,0.18), transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(255,45,120,0.15), transparent 70%)', pointerEvents: 'none' }} />
+
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 24px' }}>
+            <div style={{ fontSize: 11, letterSpacing: '3px', fontWeight: 800, color: '#39ff14', textShadow: '0 0 8px #39ff14', marginBottom: 24, textTransform: 'uppercase' }}>
+              TEAM {String(currentTeam + 1).padStart(2, '0')} / {pairs.length}
+            </div>
+
+            <div style={{ fontSize: 30, fontWeight: 900, color: '#f1f5f9', textShadow: '0 0 20px rgba(255,255,255,0.2)', marginBottom: 12 }}>
               {pairs[currentTeam]?.a.name}
             </div>
-            <div className="text-2xl text-gray-400">+</div>
-            <div
-              className={`text-3xl font-bold transition-all ${
-                spinning ? 'text-yellow-300 opacity-70' : 'text-green-300 scale-110'
-              }`}
-              style={{ minHeight: '2.5rem' }}
-            >
+            <div style={{ fontSize: 16, color: '#444', fontWeight: 700, marginBottom: 12 }}>+</div>
+            <div style={{
+              fontSize: 30, fontWeight: 900,
+              color: spinning ? '#555' : '#39ff14',
+              textShadow: spinning ? 'none' : '0 0 14px #39ff14, 0 0 30px rgba(57,255,20,0.5)',
+              transition: 'color 0.2s, text-shadow 0.2s',
+              minHeight: '2.5rem',
+            }}>
               {spinName}
             </div>
+
+            {revealedPairs.length > 0 && (
+              <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #111' }}>
+                {revealedPairs.map((p, i) => (
+                  <div key={i} style={{ fontSize: 12, color: '#333', fontWeight: 700, marginBottom: 4 }}>
+                    팀{i + 1}: {p.a.name} + {p.b.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {revealedPairs.length > 0 && (
-            <div className="text-sm text-gray-500 space-y-1">
-              {revealedPairs.map((p, i) => (
-                <div key={i}>팀{i + 1}: {p.a.name} + {p.b.name}</div>
-              ))}
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       {phase === 'finale' && (
-        <div className="w-full max-w-lg px-6 space-y-4">
-          <h2 className="text-center text-2xl font-bold mb-6">
-            🎉 Tournament Draft — 오늘의 파트너
-          </h2>
-          <div className="space-y-3 overflow-y-auto max-h-[60vh]">
-            {pairs.map((p, i) => (
-              <div
-                key={i}
-                className="bg-white/10 rounded-xl px-5 py-4 flex justify-between items-center"
-                style={{
-                  animation: `slideUp 0.4s ease ${i * 0.1}s both`,
-                }}
-              >
-                <div>
-                  <span className="text-gray-400 text-xs">팀 {i + 1}</span>
-                  <div className="font-semibold">{p.a.name} <span className="text-gray-400">+</span> {p.b.name}</div>
-                </div>
-                <div className="text-xs text-gray-400 text-right">
-                  {p.a.rating.toFixed(2)}<br />{p.b.rating.toFixed(2)}
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={onEnd}
-            className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold"
-          >
-            결과 페이지로 이동
-          </button>
-        </div>
-      )}
+        <>
+          {/* 3색 ambient glow */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 80% 0%, rgba(255,45,120,0.18), transparent 50%), radial-gradient(ellipse at 10% 100%, rgba(57,255,20,0.15), transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.07), transparent 60%)', pointerEvents: 'none' }} />
 
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+          <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 480, padding: '0 24px' }}>
+            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#555', letterSpacing: '2px', marginBottom: 20, textTransform: 'uppercase' }}>
+              배정 완료!
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', maxHeight: '60vh', marginBottom: 16 }}>
+              {pairs.map((p, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${teamColor(i)}`,
+                    borderRadius: 8,
+                    padding: '12px 16px',
+                    animation: `slideUp 0.4s ease ${i * 0.1}s both`,
+                    boxShadow: `0 0 12px ${teamColor(i)}22`,
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 800, color: teamColor(i), textShadow: `0 0 8px ${teamColor(i)}`, marginBottom: 5 }}>
+                    팀 {i + 1}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#f1f5f9' }}>
+                      {p.a.name} <span style={{ color: '#444' }}>×</span> {p.b.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#555', fontWeight: 700, textAlign: 'right' }}>
+                      {p.a.rating}<br />{p.b.rating}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={onEnd} className="btn-cta">
+              결과 페이지로 이동
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
