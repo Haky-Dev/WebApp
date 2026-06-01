@@ -5,6 +5,12 @@ import CopyButton from './CopyButton'
 
 interface Props { pairs: Pair[]; highlightId?: string | null }
 
+const NEON_COLORS = ['var(--neon-pink)', 'var(--neon-green)', 'var(--neon-cyan)']
+
+function teamColor(index: number) {
+  return NEON_COLORS[index % NEON_COLORS.length]
+}
+
 export default function AllResultsTab({ pairs, highlightId }: Props) {
   const [search, setSearch] = useState('')
 
@@ -16,47 +22,44 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
     : pairs
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <input
-          className="flex-1 border rounded px-3 py-2 text-sm"
-          placeholder="이름 검색..."
+          className="input-field"
+          style={{ flex: 1 }}
+          placeholder="이름으로 검색..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <CopyButton pairs={pairs} />
       </div>
 
-      <div className="space-y-2">
-        {filtered.map(pair => {
-          const isHighlighted =
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {filtered.map((pair, i) => {
+          const highlight =
             pair.participant_a_id === highlightId ||
             pair.participant_b_id === highlightId
-
+          const color = teamColor(i)
           return (
             <div
               key={pair.id}
-              className={`p-3 rounded-lg border ${
-                isHighlighted ? 'border-blue-400 bg-blue-50' : 'border-gray-100'
-              }`}
+              className="card-surface"
+              style={{
+                padding: '11px 14px',
+                borderLeft: `3px solid ${highlight ? 'var(--neon-cyan)' : color}`,
+                background: highlight ? 'var(--accent-bg)' : 'var(--bg-surface)',
+              }}
             >
-              <p className="text-xs text-gray-400 mb-1">팀 {pair.team_number}</p>
-              <div className="flex gap-4 text-sm">
-                <div className="flex-1">
-                  <span className="font-semibold">{pair.participant_a?.name}</span>
-                  {pair.participant_a?.club && (
-                    <span className="text-gray-400 text-xs ml-1">({pair.participant_a.club})</span>
-                  )}
-                  <span className="ml-2 text-gray-500">{pair.participant_a?.rating.toFixed(2)}</span>
-                </div>
-                <span className="text-gray-300">+</span>
-                <div className="flex-1">
-                  <span className="font-semibold">{pair.participant_b?.name}</span>
-                  {pair.participant_b?.club && (
-                    <span className="text-gray-400 text-xs ml-1">({pair.participant_b.club})</span>
-                  )}
-                  <span className="ml-2 text-gray-500">{pair.participant_b?.rating.toFixed(2)}</span>
-                </div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: highlight ? 'var(--neon-cyan)' : color, marginBottom: 5 }}>
+                팀 {pair.team_number}{highlight ? ' ← 내 팀' : ''}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {pair.participant_a?.name} × {pair.participant_b?.name}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
+                  {pair.participant_a?.rating} · {pair.participant_b?.rating}
+                </span>
               </div>
             </div>
           )
