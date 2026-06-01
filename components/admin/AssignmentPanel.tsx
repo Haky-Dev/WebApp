@@ -20,8 +20,7 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch(`/api/participants?eventId=${eventId}`)
-      .then(r => r.json()).then(setParticipants)
+    fetch(`/api/participants?eventId=${eventId}`).then(r => r.json()).then(setParticipants)
   }, [eventId])
 
   const isOdd = participants.length % 2 !== 0
@@ -31,10 +30,7 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
     setLoading(true)
     const body: Record<string, unknown> = { algorithm, groupCount }
     if (excludeId) body.excludeId = excludeId
-    if (tempName) body.tempParticipant = {
-      name: tempName, club: tempClub || null,
-      rating: parseFloat(tempRating)
-    }
+    if (tempName) body.tempParticipant = { name: tempName, club: tempClub || null, rating: parseFloat(tempRating) }
 
     const res = await fetch('/api/admin/assign', {
       method: 'POST',
@@ -42,11 +38,7 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
       body: JSON.stringify(body),
     })
     setLoading(false)
-    if (!res.ok) {
-      const d = await res.json()
-      setError(d.error)
-      return
-    }
+    if (!res.ok) { const d = await res.json(); setError(d.error); return }
     const pairsRes = await fetch(`/api/pairs/${eventId}`)
     const pairsData = await pairsRes.json()
     onAssignStart(pairsData.map((p: { participant_a: Participant; participant_b: Participant }) => ({
@@ -55,73 +47,94 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
     })))
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    boxSizing: 'border-box',
+    background: 'var(--bg-surface)',
+    border: '1.5px solid var(--border)',
+    borderRadius: 6,
+    padding: '10px 12px',
+    fontSize: 14,
+    fontWeight: 700,
+    color: 'var(--text-primary)',
+    outline: 'none',
+  }
+
   return (
-    <div className="space-y-6">
-      <p className="text-sm">참가자 {participants.length}명</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
+        참가자 <span style={{ color: 'var(--text-primary)', fontWeight: 900 }}>{participants.length}명</span>
+      </p>
 
       {isOdd && (
-        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm space-y-3">
-          <p className="font-semibold text-yellow-700">⚠ 홀수 인원 — 조정 필요</p>
-          <div>
-            <label className="block text-xs mb-1">제외할 참가자 선택:</label>
-            <select className="w-full border rounded px-2 py-1"
-              value={excludeId} onChange={e => setExcludeId(e.target.value)}>
+        <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1.5px solid var(--accent-danger)', borderRadius: 8 }}>
+          <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-danger)', marginBottom: 14 }}>⚠ 홀수 인원 — 조정 필요</p>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 6 }}>제외할 참가자 선택</label>
+            <select style={inputStyle} value={excludeId} onChange={e => setExcludeId(e.target.value)}>
               <option value="">-- 선택 --</option>
               {participants.map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.rating})</option>
               ))}
             </select>
           </div>
-          <p className="text-xs text-center text-gray-400">또는 임시 참가자 추가:</p>
-          <div className="space-y-2">
-            <input className="w-full border rounded px-2 py-1 text-sm" placeholder="이름"
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textAlign: 'center', marginBottom: 12 }}>또는 임시 참가자 추가</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <input style={inputStyle} placeholder="이름"
               value={tempName} onChange={e => { setTempName(e.target.value); setExcludeId('') }} />
-            <input className="w-full border rounded px-2 py-1 text-sm" placeholder="동호회 (선택)"
+            <input style={inputStyle} placeholder="동호회 (선택)"
               value={tempClub} onChange={e => setTempClub(e.target.value)} />
-            <input className="w-full border rounded px-2 py-1 text-sm" placeholder="레이팅"
-              type="number" min="0" max="30" step="0.01"
+            <input style={inputStyle} placeholder="레이팅" type="number" min="0" max="30" step="0.01"
               value={tempRating} onChange={e => setTempRating(e.target.value)} />
           </div>
         </div>
       )}
 
       <div>
-        <p className="text-sm font-medium mb-2">배정 방식</p>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" checked={algorithm === 'snake'}
-              onChange={() => setAlgorithm('snake')} />
-            <span className="text-sm">스네이크 드래프트</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" checked={algorithm === 'group-random'}
-              onChange={() => setAlgorithm('group-random')} />
-            <span className="text-sm">그룹 랜덤</span>
-          </label>
+        <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>배정 방식</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {(['snake', 'group-random'] as const).map(alg => (
+            <label key={alg} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <input type="radio" checked={algorithm === alg} onChange={() => setAlgorithm(alg)} />
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+                {alg === 'snake' ? '스네이크 드래프트' : '그룹 랜덤'}
+              </span>
+            </label>
+          ))}
         </div>
         {algorithm === 'group-random' && (
-          <div className="mt-3 ml-6">
-            <p className="text-xs text-gray-500 mb-1">그룹 수</p>
-            <div className="flex gap-2">
+          <div style={{ marginTop: 12, marginLeft: 24 }}>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>그룹 수</p>
+            <div style={{ display: 'flex', gap: 8 }}>
               {([2, 4] as const).map(g => (
-                <button key={g}
+                <button
+                  key={g}
                   onClick={() => setGroupCount(g)}
-                  className={`px-4 py-1 rounded text-sm font-bold ${groupCount === g
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600'}`}
-                >{g}</button>
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: 6,
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    background: groupCount === g ? 'var(--accent)' : 'var(--bg-surface)',
+                    color: groupCount === g ? '#fff' : 'var(--text-muted)',
+                    border: `1.5px solid ${groupCount === g ? 'var(--accent)' : 'var(--border)'}`,
+                  }}
+                >
+                  {g}
+                </button>
               ))}
             </div>
           </div>
         )}
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p style={{ color: 'var(--accent-danger)', fontSize: 12, fontWeight: 700 }}>{error}</p>}
 
       <button
         onClick={handleAssign}
         disabled={loading || (isOdd && !excludeId && !tempName)}
-        className="w-full bg-red-600 text-white py-3 rounded-lg font-bold disabled:opacity-40"
+        className="btn-cta"
       >
         {loading ? '배정 중...' : '🎯 파트너 배정 시작'}
       </button>

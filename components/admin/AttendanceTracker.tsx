@@ -5,6 +5,17 @@ import type { ExpectedParticipant, Participant } from '@/lib/types'
 
 interface Props { token: string; eventId: string }
 
+function Section({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p style={{ fontSize: 11, fontWeight: 800, color, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>
+        {label}
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{children}</div>
+    </div>
+  )
+}
+
 export default function AttendanceTracker({ token, eventId }: Props) {
   const [expected, setExpected] = useState<ExpectedParticipant[]>([])
   const [registered, setRegistered] = useState<Participant[]>([])
@@ -33,46 +44,47 @@ export default function AttendanceTracker({ token, eventId }: Props) {
   const extra = registered.filter(p => !expected.some(e => e.name === p.name))
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-500">
-        등록 <span className="text-green-600 font-bold">{registered.length}명</span>
-        {' / '}미등록 <span className="text-red-500 font-bold">{missing.length}명</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
+        등록{' '}
+        <span style={{ color: 'var(--accent-success)', fontWeight: 900 }}>{registered.length}명</span>
+        {' / '}미등록{' '}
+        <span style={{ color: 'var(--accent-danger)', fontWeight: 900 }}>{missing.length}명</span>
       </p>
 
       {done.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-green-600 mb-1">✓ 등록 완료</p>
+        <Section label="✓ 등록 완료" color="var(--accent-success)">
           {done.map(p => {
             const reg = registered.find(r => r.name === p.name)
             return (
-              <div key={p.id} className="flex justify-between p-2 bg-green-50 rounded mb-1 text-sm">
-                <span>{p.name}</span>
-                <span className="text-gray-500">{reg?.rating.toFixed(2)}</span>
+              <div key={p.id} className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderLeft: '3px solid var(--accent-success)' }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>{reg?.rating.toFixed(2)}</span>
               </div>
             )
           })}
-        </div>
+        </Section>
       )}
 
       {missing.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-red-500 mb-1">✗ 미등록</p>
+        <Section label="✗ 미등록" color="var(--accent-danger)">
           {missing.map(p => (
-            <div key={p.id} className="p-2 bg-red-50 rounded mb-1 text-sm">{p.name}</div>
+            <div key={p.id} className="card-surface" style={{ padding: '10px 14px', borderLeft: '3px solid var(--accent-danger)' }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}</span>
+            </div>
           ))}
-        </div>
+        </Section>
       )}
 
       {extra.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-orange-500 mb-1">＋ 명단 외 등록</p>
+        <Section label="＋ 명단 외 등록" color="var(--neon-cyan)">
           {extra.map(p => (
-            <div key={p.id} className="flex justify-between p-2 bg-orange-50 rounded mb-1 text-sm">
-              <span>{p.name}{p.club ? ` (${p.club})` : ''}</span>
-              <span className="text-gray-500">{p.rating.toFixed(2)}</span>
+            <div key={p.id} className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderLeft: '3px solid var(--neon-cyan)' }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{p.name}{p.club ? ` (${p.club})` : ''}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>{p.rating.toFixed(2)}</span>
             </div>
           ))}
-        </div>
+        </Section>
       )}
     </div>
   )
