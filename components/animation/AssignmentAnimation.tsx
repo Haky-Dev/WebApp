@@ -11,9 +11,17 @@ interface Props {
 type Phase = 'drumroll' | 'finale'
 
 const TEAM_COLORS = ['#ff2d78', '#39ff14', '#00d4ff']
+const TEAM_COLORS_RGBA = [
+  'rgba(255, 45, 120, 0.13)',
+  'rgba(57, 255, 20, 0.13)',
+  'rgba(0, 212, 255, 0.13)',
+]
 
 function teamColor(i: number) {
   return TEAM_COLORS[i % TEAM_COLORS.length]
+}
+function teamColorRgba(i: number) {
+  return TEAM_COLORS_RGBA[i % TEAM_COLORS_RGBA.length]
 }
 
 export default function AssignmentAnimation({ pairs, onEnd }: Props) {
@@ -109,7 +117,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
             {revealedPairs.length > 0 && (
               <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #111' }}>
                 {revealedPairs.map((p, i) => (
-                  <div key={i} style={{ fontSize: 12, color: '#333', fontWeight: 700, marginBottom: 4 }}>
+                  <div key={i} style={{ fontSize: 12, color: '#444', fontWeight: 700, marginBottom: 4 }}>
                     팀{i + 1}: {p.a.name} + {p.b.name}
                   </div>
                 ))}
@@ -139,7 +147,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                     borderRadius: 8,
                     padding: '12px 16px',
                     animation: `slideUp 0.4s ease ${i * 0.1}s both`,
-                    boxShadow: `0 0 12px ${teamColor(i)}22`,
+                    boxShadow: `0 0 12px ${teamColorRgba(i)}`,
                   }}
                 >
                   <div style={{ fontSize: 11, fontWeight: 800, color: teamColor(i), textShadow: `0 0 8px ${teamColor(i)}`, marginBottom: 5 }}>
