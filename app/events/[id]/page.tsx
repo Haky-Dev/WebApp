@@ -83,7 +83,7 @@ export default function RegisterPage() {
         <div
           style={{ textAlign: 'center', marginBottom: 30, cursor: 'pointer', userSelect: 'none' }}
           onMouseDown={startPress} onMouseUp={endPress}
-          onTouchStart={startPress} onTouchEnd={endPress}
+          onTouchStart={startPress} onTouchEnd={endPress} onTouchCancel={endPress}
         >
           <div style={{ marginBottom: 10 }}><LogoType /></div>
           <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: 5 }}>
