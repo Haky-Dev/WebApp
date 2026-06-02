@@ -16,6 +16,7 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
   const [editClub, setEditClub] = useState('')
   const [editRating, setEditRating] = useState('')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -50,9 +51,11 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
     setEditingId(p.id)
     setEditClub(p.club ?? '')
     setEditRating(String(p.rating))
+    setSaveError('')
   }
 
   async function handleSave(id: string) {
+    setSaveError('')
     setSaving(true)
     const res = await fetch(`/api/admin/participants/${id}`, {
       method: 'PATCH',
@@ -60,10 +63,15 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
       body: JSON.stringify({ club: editClub, rating: parseFloat(editRating) }),
     })
     setSaving(false)
-    if (!res.ok) return
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setSaveError(d.error ?? '저장 실패')
+      return
+    }
     const updated: Participant = await res.json()
     setList(l => l.map(p => p.id === id ? updated : p))
     setEditingId(null)
+    setSaveError('')
   }
 
   async function handleDelete() {
@@ -200,6 +208,7 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
                     onChange={e => setEditRating(e.target.value)}
                   />
                 </div>
+                {saveError && <p style={{ color: 'var(--accent-danger)', fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{saveError}</p>}
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
                     onClick={() => setEditingId(null)}

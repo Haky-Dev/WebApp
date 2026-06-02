@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import RegistrationForm from '@/components/registration/RegistrationForm'
 import { useRealtimeEvent } from '@/hooks/useRealtimeEvent'
@@ -108,10 +108,10 @@ export default function RegisterPage() {
   const [myId, setMyId] = useState<string | null>(null)
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const res = await fetch(`/api/participants?eventId=${id}`).catch(() => null)
     if (res?.ok) setParticipants(await res.json())
-  }
+  }, [id])
 
   useEffect(() => {
     setMyId(localStorage.getItem(PARTICIPANT_KEY))
