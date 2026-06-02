@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyAdminToken } from '@/lib/auth/admin-token'
+import { resolveEventId } from '@/lib/auth/admin-token'
 
 export async function GET(
   _req: NextRequest,
@@ -23,13 +23,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-
-  const authHeader = req.headers.get('Authorization')
-  const token = authHeader?.replace('Bearer ', '')
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const payload = await verifyAdminToken(token)
-  if (!payload || payload.eventId !== id) {
+  const eventId = await resolveEventId(token, id)
+  if (!eventId || eventId !== id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

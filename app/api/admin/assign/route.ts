@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyAdminToken } from '@/lib/auth/admin-token'
+import { resolveEventId } from '@/lib/auth/admin-token'
 import { snakeDraft } from '@/lib/algorithms/snake-draft'
 import { groupRandom } from '@/lib/algorithms/group-random'
 import type { Participant } from '@/lib/types'
@@ -8,13 +8,12 @@ import type { Participant } from '@/lib/types'
 export async function POST(req: NextRequest) {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const payload = await verifyAdminToken(token)
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const eventId = await resolveEventId(token)
+  if (!eventId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { algorithm, groupCount, excludeId, tempParticipant } = await req.json()
 
   const supabase = createServiceClient()
-  const eventId = payload.eventId
 
   const { data: eventRecord } = await supabase
     .from('events')

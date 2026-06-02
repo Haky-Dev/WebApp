@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyAdminToken } from '@/lib/auth/admin-token'
+import { resolveEventId } from '@/lib/auth/admin-token'
 
 async function authorize(req: NextRequest, participantId: string) {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return null
-  const payload = await verifyAdminToken(token)
-  if (!payload) return null
 
   const supabase = createServiceClient()
-  const { data } = await supabase
+  const { data: participant } = await supabase
     .from('participants')
-    .select('id')
+    .select('id, event_id')
     .eq('id', participantId)
-    .eq('event_id', payload.eventId)
     .single()
 
-  return data ? payload : null
+  if (!participant) return null
+
+  const eventId = await resolveEventId(token, participant.event_id)
+  if (!eventId || eventId !== participant.event_id) return null
+
+  return { eventId }
 }
 
 export async function PATCH(

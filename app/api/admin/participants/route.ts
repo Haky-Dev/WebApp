@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyAdminToken } from '@/lib/auth/admin-token'
+import { resolveEventId } from '@/lib/auth/admin-token'
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('Authorization')
   const token = authHeader?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const payload = await verifyAdminToken(token)
-  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const eventId = await resolveEventId(token)
+  if (!eventId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { name, club, rating } = await req.json()
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from('participants')
     .insert({
-      event_id: payload.eventId,
+      event_id: eventId,
       name: name.trim(),
       club: club?.trim() || null,
       rating: Math.round(r * 100) / 100,
