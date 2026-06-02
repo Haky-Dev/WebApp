@@ -22,3 +22,29 @@ export async function verifyAdminToken(
     return null
   }
 }
+
+export async function signMasterToken(): Promise<string> {
+  return new SignJWT({ role: 'master' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('24h')
+    .sign(getSecret())
+}
+
+export async function verifyMasterToken(token: string): Promise<boolean> {
+  try {
+    const { payload } = await jwtVerify(token, getSecret())
+    return payload.role === 'master'
+  } catch {
+    return false
+  }
+}
+
+export async function resolveEventId(
+  token: string,
+  fallbackEventId?: string
+): Promise<string | null> {
+  const payload = await verifyAdminToken(token)
+  if (payload) return payload.eventId
+  if (await verifyMasterToken(token)) return fallbackEventId ?? null
+  return null
+}
