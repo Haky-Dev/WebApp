@@ -29,6 +29,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem(`admin_token_${id}`)
+                ?? localStorage.getItem('master_token')
     if (saved) setToken(saved)
   }, [])
 
@@ -70,7 +71,8 @@ export default function AdminPage() {
     setResetting(true)
     const res = await fetch('/api/admin/pairs', {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId: id }),
     })
     setResetting(false)
     if (res.ok) {
