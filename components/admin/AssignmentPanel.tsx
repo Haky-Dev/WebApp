@@ -30,7 +30,7 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
   async function handleAssign() {
     setError('')
     setLoading(true)
-    const body: Record<string, unknown> = { algorithm, groupCount }
+    const body: Record<string, unknown> = { algorithm, groupCount, eventId }
     if (excludeId) body.excludeId = excludeId
     if (tempName) body.tempParticipant = { name: tempName, club: tempClub || null, rating: parseFloat(tempRating) }
 
