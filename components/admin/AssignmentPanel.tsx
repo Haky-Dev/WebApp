@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import type { Participant, EventStatus } from '@/lib/types'
+import type { Participant, EventStatus, Club } from '@/lib/types'
 
 interface Props {
   token: string
@@ -20,6 +20,10 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
   const [tempRating, setTempRating] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [clubs, setClubs] = useState<Club[]>([])
+  useEffect(() => {
+    fetch('/api/clubs').then(r => r.json()).then(setClubs)
+  }, [])
 
   useEffect(() => {
     fetch(`/api/participants?eventId=${eventId}`).then(r => r.json()).then(setParticipants)
@@ -84,8 +88,14 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <input style={inputStyle} placeholder="이름"
               value={tempName} onChange={e => { setTempName(e.target.value); setExcludeId('') }} />
-            <input style={inputStyle} placeholder="동호회 (선택)"
-              value={tempClub} onChange={e => setTempClub(e.target.value)} />
+            {clubs.length > 0 ? (
+              <select style={inputStyle} value={tempClub} onChange={e => setTempClub(e.target.value)}>
+                <option value="">— 선택 안 함</option>
+                {clubs.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              </select>
+            ) : (
+              <input style={inputStyle} placeholder="동호회 (선택)" value={tempClub} onChange={e => setTempClub(e.target.value)} />
+            )}
             <input style={inputStyle} placeholder="레이팅" type="number" min="0" max="30" step="0.01"
               value={tempRating} onChange={e => setTempRating(e.target.value)} />
           </div>

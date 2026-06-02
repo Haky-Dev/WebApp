@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import type { Participant } from '@/lib/types'
+import type { Participant, Club } from '@/lib/types'
 
 interface Props { token: string; eventId: string }
 
@@ -17,6 +17,10 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
   const [editRating, setEditRating] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [clubs, setClubs] = useState<Club[]>([])
+  useEffect(() => {
+    fetch('/api/clubs').then(r => r.json()).then(setClubs)
+  }, [eventId])
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -138,13 +142,19 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
             onChange={e => setAddName(e.target.value)}
             required
           />
-          <input
-            className="input-field"
-            style={{ flex: 2, fontWeight: 400 }}
-            placeholder="동호회"
-            value={addClub}
-            onChange={e => setAddClub(e.target.value)}
-          />
+          {clubs.length > 0 ? (
+            <select
+              className="input-field"
+              style={{ flex: 2, fontWeight: 400 }}
+              value={addClub}
+              onChange={e => setAddClub(e.target.value)}
+            >
+              <option value="">— 선택 안 함</option>
+              {clubs.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+            </select>
+          ) : (
+            <input className="input-field" style={{ flex: 2, fontWeight: 400 }} placeholder="동호회" value={addClub} onChange={e => setAddClub(e.target.value)} />
+          )}
           <input
             className="input-field"
             style={{ flex: 1, textAlign: 'center' }}
@@ -190,13 +200,19 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
                   <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>(이름 잠금)</span>
                 </div>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                  <input
-                    className="input-field"
-                    style={{ flex: 2, fontWeight: 400, padding: '8px 10px', fontSize: 13 }}
-                    placeholder="동호회"
-                    value={editClub}
-                    onChange={e => setEditClub(e.target.value)}
-                  />
+                  {clubs.length > 0 ? (
+                    <select
+                      className="input-field"
+                      style={{ flex: 2, fontWeight: 400, padding: '8px 10px', fontSize: 13 }}
+                      value={editClub}
+                      onChange={e => setEditClub(e.target.value)}
+                    >
+                      <option value="">— 선택 안 함</option>
+                      {clubs.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    </select>
+                  ) : (
+                    <input className="input-field" style={{ flex: 2, fontWeight: 400, padding: '8px 10px', fontSize: 13 }} placeholder="동호회" value={editClub} onChange={e => setEditClub(e.target.value)} />
+                  )}
                   <input
                     className="input-field"
                     style={{ flex: 1, textAlign: 'center', padding: '8px 10px', fontSize: 13 }}

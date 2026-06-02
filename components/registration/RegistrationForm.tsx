@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import type { Participant } from '@/lib/types'
+import { useEffect, useState } from 'react'
+import type { Participant, Club } from '@/lib/types'
 
 interface Props {
   eventId: string
@@ -13,6 +13,10 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
   const [rating, setRating] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [clubs, setClubs] = useState<Club[]>([])
+  useEffect(() => {
+    fetch('/api/clubs').then(r => r.json()).then(setClubs)
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -47,12 +51,24 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
       </div>
       <div>
         <label className="field-label" style={{ color: 'var(--text-muted)' }}>동호회 (선택)</label>
-        <input
-          className="input-field"
-          value={club}
-          onChange={e => setClub(e.target.value)}
-          placeholder="위로"
-        />
+        {clubs.length > 0 ? (
+          <select
+            className="input-field"
+            style={{ fontWeight: 400 }}
+            value={club}
+            onChange={e => setClub(e.target.value)}
+          >
+            <option value="">— 선택 안 함</option>
+            {clubs.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
+        ) : (
+          <input
+            className="input-field"
+            value={club}
+            onChange={e => setClub(e.target.value)}
+            placeholder="위로"
+          />
+        )}
       </div>
       <div>
         <label className="field-label">레이팅 (0.00 ~ 30.00) *</label>
