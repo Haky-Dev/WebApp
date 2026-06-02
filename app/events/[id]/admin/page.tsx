@@ -5,7 +5,7 @@ import AdminPinModal from '@/components/admin/AdminPinModal'
 import AdminParticipantPanel from '@/components/admin/AdminParticipantPanel'
 import AssignmentPanel from '@/components/admin/AssignmentPanel'
 import AssignmentAnimation from '@/components/animation/AssignmentAnimation'
-import type { Participant } from '@/lib/types'
+import type { Participant, EventStatus } from '@/lib/types'
 
 type Tab = 'participants' | 'assign'
 
@@ -23,11 +23,18 @@ export default function AdminPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [eventStatus, setEventStatus] = useState<EventStatus>('collecting')
 
   useEffect(() => {
     const saved = localStorage.getItem(`admin_token_${id}`)
     if (saved) setToken(saved)
   }, [])
+
+  useEffect(() => {
+    fetch(`/api/events/${id}`)
+      .then(r => r.json())
+      .then(data => { if (data.status) setEventStatus(data.status) })
+  }, [id])
 
   function handleTokenSet(t: string) {
     localStorage.setItem(`admin_token_${id}`, t)
@@ -53,6 +60,18 @@ export default function AdminPage() {
       const data = await res.json()
       setDeleteError(data.error ?? '삭제 실패')
       setDeleting(false)
+    }
+  }
+
+  async function handleReset() {
+    if (!token) return
+    const res = await fetch('/api/admin/pairs', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (res.ok) {
+      setEventStatus('collecting')
+      setTab('participants')
     }
   }
 
@@ -152,7 +171,15 @@ export default function AdminPage() {
         {token && (
           <>
             {tab === 'participants' && <AdminParticipantPanel token={token} eventId={id} />}
-            {tab === 'assign' && <AssignmentPanel token={token} eventId={id} onAssignStart={setAnimationPairs} />}
+            {tab === 'assign' && (
+              <AssignmentPanel
+                token={token}
+                eventId={id}
+                eventStatus={eventStatus}
+                onAssignStart={(pairs) => { setEventStatus('closed'); setAnimationPairs(pairs) }}
+                onReset={handleReset}
+              />
+            )}
           </>
         )}
       </div>

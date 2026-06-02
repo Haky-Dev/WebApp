@@ -1,14 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react'
-import type { Participant } from '@/lib/types'
+import type { Participant, EventStatus } from '@/lib/types'
 
 interface Props {
   token: string
   eventId: string
+  eventStatus: EventStatus
   onAssignStart: (pairs: { a: Participant; b: Participant }[]) => void
+  onReset: () => void
 }
 
-export default function AssignmentPanel({ token, eventId, onAssignStart }: Props) {
+export default function AssignmentPanel({ token, eventId, eventStatus, onAssignStart, onReset }: Props) {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [algorithm, setAlgorithm] = useState<'snake' | 'group-random'>('snake')
   const [groupCount, setGroupCount] = useState<2 | 4>(2)
@@ -18,6 +20,8 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
   const [tempRating, setTempRating] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     fetch(`/api/participants?eventId=${eventId}`).then(r => r.json()).then(setParticipants)
@@ -47,6 +51,13 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
     })))
   }
 
+  async function handleResetConfirm() {
+    setResetting(true)
+    await onReset()
+    setResetting(false)
+    setShowResetConfirm(false)
+  }
+
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
@@ -62,6 +73,40 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* 리셋 확인 모달 */}
+      {showResetConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-panel" style={{ borderTop: '2px solid var(--accent-danger)' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent-danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+              ⚠ 배정 초기화
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>
+              배정을 초기화할까요?
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 20 }}>
+              배정 결과가 삭제되고 다시 배정할 수 있습니다.<br />참가자는 유지됩니다.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                disabled={resetting}
+                className="btn-ghost"
+                style={{ flex: 1 }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleResetConfirm}
+                disabled={resetting}
+                className="btn-danger"
+                style={{ flex: 1 }}
+              >
+                {resetting ? '초기화 중...' : '초기화'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
         참가자 <span style={{ color: 'var(--text-primary)', fontWeight: 900 }}>{participants.length}명</span>
       </p>
@@ -138,6 +183,24 @@ export default function AssignmentPanel({ token, eventId, onAssignStart }: Props
       >
         {loading ? '배정 중...' : '🎯 파트너 배정 시작'}
       </button>
+      {eventStatus === 'closed' && (
+        <button
+          onClick={() => setShowResetConfirm(true)}
+          style={{
+            background: 'none',
+            border: '1px solid var(--accent-danger)',
+            borderRadius: 6,
+            padding: '10px',
+            fontSize: 13,
+            fontWeight: 800,
+            color: 'var(--accent-danger)',
+            cursor: 'pointer',
+            width: '100%',
+          }}
+        >
+          배정 초기화
+        </button>
+      )}
     </div>
   )
 }
