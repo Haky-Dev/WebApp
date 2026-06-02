@@ -15,6 +15,9 @@ export async function POST(req: NextRequest) {
   if (!name?.trim()) {
     return NextResponse.json({ error: 'name required' }, { status: 400 })
   }
+  if (rating === undefined || rating === null) {
+    return NextResponse.json({ error: 'rating required' }, { status: 400 })
+  }
   const r = Number(rating)
   if (isNaN(r) || r < 0 || r > 30) {
     return NextResponse.json({ error: 'rating must be 0–30' }, { status: 400 })
