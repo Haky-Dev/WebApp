@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import MyPartnerTab from '@/components/results/MyPartnerTab'
 import AllResultsTab from '@/components/results/AllResultsTab'
+import CopyButton from '@/components/results/CopyButton'
 import type { Pair } from '@/lib/types'
 
 type Tab = 'my' | 'all'
@@ -26,25 +27,78 @@ export default function ResultsPage() {
 
   const [pairs, setPairs] = useState<Pair[]>([])
   const [tab, setTab] = useState<Tab>(participantId ? 'my' : 'all')
+  const [adminToken, setAdminToken] = useState<string | null>(null)
+  const [resetting, setResetting] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   useEffect(() => {
     fetch(`/api/pairs/${id}`).then(r => r.json()).then(setPairs)
+    setAdminToken(localStorage.getItem(`admin_token_${id}`))
   }, [id])
+
+  async function handleReset() {
+    if (!adminToken) return
+    setResetting(true)
+    const res = await fetch('/api/admin/pairs', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` },
+    })
+    setResetting(false)
+    if (res.ok) {
+      setShowResetConfirm(false)
+      router.push(`/events/${id}/admin`)
+    }
+  }
 
   return (
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
-        <div style={{ marginBottom: 22 }}>
-          <button
-            onClick={() => router.push('/')}
-            style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
-          >
-            ← 홈
-          </button>
-          <div style={{ fontSize: 11, letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
-            배정 결과
+
+        {/* 배정 초기화 확인 모달 */}
+        {showResetConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-panel" style={{ borderTop: '2px solid var(--neon-cyan)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+                ⚠ 배정 초기화
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>배정을 초기화할까요?</div>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 20 }}>
+                배정 결과가 삭제되고 다시 배정할 수 있습니다.<br />참가자는 유지됩니다.
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setShowResetConfirm(false)} disabled={resetting} className="btn-ghost" style={{ flex: 1 }}>취소</button>
+                <button onClick={handleReset} disabled={resetting} className="btn-danger" style={{ flex: 1 }}>
+                  {resetting ? '초기화 중...' : '초기화'}
+                </button>
+              </div>
+            </div>
           </div>
-          <LogoType />
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
+          <div>
+            <button
+              onClick={() => router.push('/')}
+              style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+            >
+              ← 홈
+            </button>
+            <div style={{ fontSize: 11, letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
+              배정 결과
+            </div>
+            <LogoType />
+          </div>
+          {adminToken && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, paddingTop: 20 }}>
+              <CopyButton pairs={pairs} />
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 800, color: 'var(--neon-cyan)', cursor: 'pointer', padding: 0 }}
+              >
+                배정 초기화
+              </button>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
