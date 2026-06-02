@@ -24,6 +24,8 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [eventStatus, setEventStatus] = useState<EventStatus>('collecting')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem(`admin_token_${id}`)
@@ -65,12 +67,15 @@ export default function AdminPage() {
 
   async function handleReset() {
     if (!token) return
+    setResetting(true)
     const res = await fetch('/api/admin/pairs', {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     })
+    setResetting(false)
     if (res.ok) {
       setEventStatus('collecting')
+      setShowResetConfirm(false)
       setTab('participants')
     }
   }
@@ -83,6 +88,39 @@ export default function AdminPage() {
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
         {!token && <AdminPinModal eventId={id} onSuccess={handleTokenSet} />}
+
+        {/* 배정 초기화 확인 모달 */}
+        {showResetConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-panel" style={{ borderTop: '2px solid var(--neon-cyan)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+                ⚠ 배정 초기화
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>배정을 초기화할까요?</div>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 20 }}>
+                배정 결과가 삭제되고 다시 배정할 수 있습니다.<br />참가자는 유지됩니다.
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  disabled={resetting}
+                  className="btn-ghost"
+                  style={{ flex: 1 }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleReset}
+                  disabled={resetting}
+                  className="btn-danger"
+                  style={{ flex: 1 }}
+                >
+                  {resetting ? '초기화 중...' : '초기화'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 토너먼트 삭제 확인 모달 */}
         {showDeleteConfirm && (
@@ -135,12 +173,22 @@ export default function AdminPage() {
             </div>
           </div>
           {token && (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-danger)', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              토너먼트 삭제
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+              {eventStatus === 'closed' && (
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  style={{ fontSize: 12, fontWeight: 800, color: 'var(--neon-cyan)', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  배정 초기화
+                </button>
+              )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-danger)', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                토너먼트 삭제
+              </button>
+            </div>
           )}
         </div>
 

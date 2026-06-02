@@ -46,24 +46,33 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                 background: highlight ? 'var(--accent-bg)' : 'var(--bg-surface)',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 800, color: highlight ? 'var(--neon-cyan)' : color, marginBottom: 5 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: highlight ? 'var(--neon-cyan)' : color, marginBottom: 8 }}>
                 팀 {pair.team_number}{highlight ? ' ← 내 팀' : ''}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {pair.participant_a?.name}
-                  {pair.participant_a?.club && (
-                    <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}> ({pair.participant_a.club})</span>
-                  )}
-                  {' × '}
-                  {pair.participant_b?.name}
-                  {pair.participant_b?.club && (
-                    <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}> ({pair.participant_b.club})</span>
-                  )}
-                </span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                  {pair.participant_a?.rating} · {pair.participant_b?.rating}
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>
+                    {pair.participant_a?.club || '—'}
+                  </span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {pair.participant_a?.name}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>
+                    {pair.participant_a?.rating}
+                  </span>
+                </div>
+                <span style={{ color: 'var(--text-muted)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>×</span>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>
+                    {pair.participant_b?.club || '—'}
+                  </span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {pair.participant_b?.name}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>
+                    {pair.participant_b?.rating}
+                  </span>
+                </div>
               </div>
             </div>
           )
