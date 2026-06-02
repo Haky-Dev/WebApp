@@ -157,13 +157,21 @@ export default function RegisterPage() {
   if (event.status === 'closed' && !registered) {
     return (
       <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ maxWidth: 384, width: '100%', padding: '24px', textAlign: 'center' }}>
-          <LogoType />
-          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '12px 0 8px', letterSpacing: '-0.5px' }}>{event.name}</div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, marginBottom: 20 }}>참가 신청이 마감되었습니다.</p>
-          <button className="btn-cta" onClick={() => router.push(`/events/${id}/results`)}>
-            결과 보기
+        <div style={{ maxWidth: 384, width: '100%', padding: '24px' }}>
+          <button
+            onClick={() => router.push('/')}
+            style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+          >
+            ← 홈
           </button>
+          <div style={{ textAlign: 'center' }}>
+            <LogoType />
+            <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '12px 0 8px', letterSpacing: '-0.5px' }}>{event.name}</div>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, marginBottom: 20 }}>참가 신청이 마감되었습니다.</p>
+            <button className="btn-cta" onClick={() => router.push(`/events/${id}/results`)}>
+              결과 보기
+            </button>
+          </div>
         </div>
       </main>
     )
@@ -172,6 +180,12 @@ export default function RegisterPage() {
   return (
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 384, margin: '0 auto', padding: '24px' }}>
+        <button
+          onClick={() => router.push('/')}
+          style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+        >
+          ← 홈
+        </button>
         <div
           style={{ textAlign: 'center', marginBottom: 30, cursor: 'pointer', userSelect: 'none' }}
           onMouseDown={startPress} onMouseUp={endPress}

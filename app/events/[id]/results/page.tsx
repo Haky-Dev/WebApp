@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import MyPartnerTab from '@/components/results/MyPartnerTab'
 import AllResultsTab from '@/components/results/AllResultsTab'
 import type { Pair } from '@/lib/types'
@@ -19,6 +19,7 @@ function LogoType() {
 
 export default function ResultsPage() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const participantId = searchParams.get('p') ||
     (typeof window !== 'undefined' ? localStorage.getItem('my_participant_id') : null)
@@ -34,6 +35,12 @@ export default function ResultsPage() {
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
         <div style={{ marginBottom: 22 }}>
+          <button
+            onClick={() => router.push('/')}
+            style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+          >
+            ← 홈
+          </button>
           <div style={{ fontSize: 11, letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
             배정 결과
           </div>
