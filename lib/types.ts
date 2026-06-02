@@ -31,3 +31,9 @@ export interface Pair {
   participant_a?: Participant
   participant_b?: Participant
 }
+
+export interface Club {
+  id: string
+  name: string
+  created_at: string
+}
