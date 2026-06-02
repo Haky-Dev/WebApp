@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import MyPartnerTab from '@/components/results/MyPartnerTab'
 import AllResultsTab from '@/components/results/AllResultsTab'
 import CopyButton from '@/components/results/CopyButton'
+import AdminPinModal from '@/components/admin/AdminPinModal'
 import type { Pair } from '@/lib/types'
 
 type Tab = 'my' | 'all'
@@ -30,6 +31,22 @@ export default function ResultsPage() {
   const [adminToken, setAdminToken] = useState<string | null>(null)
   const [resetting, setResetting] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showPinModal, setShowPinModal] = useState(false)
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function startPress() {
+    if (adminToken) return
+    pressTimer.current = setTimeout(() => setShowPinModal(true), 3000)
+  }
+  function endPress() {
+    if (pressTimer.current) clearTimeout(pressTimer.current)
+  }
+
+  function handlePinSuccess(token: string) {
+    localStorage.setItem(`admin_token_${id}`, token)
+    setAdminToken(token)
+    setShowPinModal(false)
+  }
 
   useEffect(() => {
     fetch(`/api/pairs/${id}`).then(r => r.json()).then(setPairs)
@@ -53,6 +70,14 @@ export default function ResultsPage() {
   return (
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
+
+        {showPinModal && (
+          <AdminPinModal
+            eventId={id}
+            onSuccess={handlePinSuccess}
+            onCancel={() => setShowPinModal(false)}
+          />
+        )}
 
         {/* 배정 초기화 확인 모달 */}
         {showResetConfirm && (
@@ -86,7 +111,13 @@ export default function ResultsPage() {
             <div style={{ fontSize: 11, letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
               배정 결과
             </div>
-            <LogoType />
+            <div
+              style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-block' }}
+              onMouseDown={startPress} onMouseUp={endPress}
+              onTouchStart={startPress} onTouchEnd={endPress} onTouchCancel={endPress}
+            >
+              <LogoType />
+            </div>
           </div>
           {adminToken && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, paddingTop: 20 }}>
