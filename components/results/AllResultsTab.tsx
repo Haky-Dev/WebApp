@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import type { Pair } from '@/lib/types'
-import CopyButton from './CopyButton'
 
 interface Props { pairs: Pair[]; highlightId?: string | null }
 
@@ -23,16 +22,12 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          className="input-field"
-          style={{ flex: 1 }}
-          placeholder="이름으로 검색..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <CopyButton pairs={pairs} />
-      </div>
+      <input
+        className="input-field"
+        placeholder="이름으로 검색..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         {filtered.map((pair) => {
