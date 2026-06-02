@@ -5,7 +5,8 @@ import MyPartnerTab from '@/components/results/MyPartnerTab'
 import AllResultsTab from '@/components/results/AllResultsTab'
 import CopyButton from '@/components/results/CopyButton'
 import AdminPinModal from '@/components/admin/AdminPinModal'
-import type { Pair } from '@/lib/types'
+import PartnerRevealAnimation from '@/components/results/PartnerRevealAnimation'
+import type { Pair, Participant } from '@/lib/types'
 
 type Tab = 'my' | 'all'
 
@@ -33,6 +34,9 @@ export default function ResultsPage() {
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showPinModal, setShowPinModal] = useState(false)
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [showReveal, setShowReveal] = useState(false)
+  const [revealPartner, setRevealPartner] = useState<Participant | null>(null)
+  const [allNames, setAllNames] = useState<string[]>([])
 
   function startPress() {
     if (adminToken) return
@@ -49,9 +53,34 @@ export default function ResultsPage() {
   }
 
   useEffect(() => {
-    fetch(`/api/pairs/${id}`).then(r => r.json()).then(setPairs)
+    fetch(`/api/pairs/${id}`)
+      .then(r => r.json())
+      .then((data: Pair[]) => {
+        setPairs(data)
+        if (participantId && !sessionStorage.getItem(`seen_partner_${id}`)) {
+          const myPair = data.find(p =>
+            p.participant_a_id === participantId || p.participant_b_id === participantId
+          )
+          if (myPair) {
+            const partner = myPair.participant_a_id === participantId
+              ? myPair.participant_b!
+              : myPair.participant_a!
+            const names = data
+              .flatMap(p => [p.participant_a?.name, p.participant_b?.name])
+              .filter(Boolean) as string[]
+            setRevealPartner(partner)
+            setAllNames(names)
+            setShowReveal(true)
+          }
+        }
+      })
     setAdminToken(localStorage.getItem(`admin_token_${id}`))
   }, [id])
+
+  function handleRevealEnd() {
+    sessionStorage.setItem(`seen_partner_${id}`, '1')
+    setShowReveal(false)
+  }
 
   async function handleReset() {
     if (!adminToken) return
@@ -65,6 +94,16 @@ export default function ResultsPage() {
       setShowResetConfirm(false)
       router.push(`/events/${id}/admin`)
     }
+  }
+
+  if (showReveal && revealPartner) {
+    return (
+      <PartnerRevealAnimation
+        partner={revealPartner}
+        allNames={allNames}
+        onEnd={handleRevealEnd}
+      />
+    )
   }
 
   return (
