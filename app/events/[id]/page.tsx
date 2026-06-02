@@ -6,6 +6,7 @@ import { useRealtimeEvent } from '@/hooks/useRealtimeEvent'
 import type { Participant } from '@/lib/types'
 
 const PARTICIPANT_KEY = 'my_participant_id'
+const registeredKey = (eventId: string) => `registered_event_${eventId}`
 
 function LogoType() {
   return (
@@ -115,7 +116,8 @@ export default function RegisterPage() {
 
   useEffect(() => {
     setMyId(localStorage.getItem(PARTICIPANT_KEY))
-  }, [])
+    if (id && localStorage.getItem(registeredKey(id))) setRegistered(true)
+  }, [id])
 
   useEffect(() => {
     if (event?.status === 'closed' && registered) {
@@ -133,6 +135,7 @@ export default function RegisterPage() {
 
   function handleSuccess(participant: Participant) {
     localStorage.setItem(PARTICIPANT_KEY, participant.id)
+    localStorage.setItem(registeredKey(id), '1')
     setMyId(participant.id)
     setRegistered(true)
     setParticipants(prev => [...prev, participant])
