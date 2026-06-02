@@ -2,17 +2,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import AdminPinModal from '@/components/admin/AdminPinModal'
-import ExpectedList from '@/components/admin/ExpectedList'
-import AttendanceTracker from '@/components/admin/AttendanceTracker'
+import AdminParticipantPanel from '@/components/admin/AdminParticipantPanel'
 import AssignmentPanel from '@/components/admin/AssignmentPanel'
 import AssignmentAnimation from '@/components/animation/AssignmentAnimation'
 import type { Participant } from '@/lib/types'
 
-type Tab = 'expected' | 'attendance' | 'assign'
+type Tab = 'participants' | 'assign'
 
 const TABS: [Tab, string][] = [
-  ['expected', '명단 관리'],
-  ['attendance', '참가 확인'],
+  ['participants', '명단 관리'],
   ['assign', '마감 / 배정'],
 ]
 
@@ -20,7 +18,7 @@ export default function AdminPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('expected')
+  const [tab, setTab] = useState<Tab>('participants')
   const [animationPairs, setAnimationPairs] = useState<{ a: Participant; b: Participant }[] | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -67,7 +65,7 @@ export default function AdminPage() {
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
         {!token && <AdminPinModal eventId={id} onSuccess={handleTokenSet} />}
 
-        {/* 삭제 확인 모달 */}
+        {/* 토너먼트 삭제 확인 모달 */}
         {showDeleteConfirm && (
           <div className="modal-overlay">
             <div className="modal-panel" style={{ borderTop: '2px solid var(--accent-danger)' }}>
@@ -121,7 +119,7 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* 탭 */}
+        {/* 탭 (2개) */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
           {TABS.map(([key, label]) => (
             <button
@@ -147,8 +145,7 @@ export default function AdminPage() {
 
         {token && (
           <>
-            {tab === 'expected' && <ExpectedList token={token} eventId={id} />}
-            {tab === 'attendance' && <AttendanceTracker token={token} eventId={id} />}
+            {tab === 'participants' && <AdminParticipantPanel token={token} eventId={id} />}
             {tab === 'assign' && <AssignmentPanel token={token} eventId={id} onAssignStart={setAnimationPairs} />}
           </>
         )}

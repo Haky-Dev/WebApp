@@ -41,7 +41,7 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
           className="input-field"
           value={name}
           onChange={e => setName(e.target.value)}
-          placeholder="홍길동"
+          placeholder="김위로"
           required
         />
       </div>
@@ -51,7 +51,7 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
           className="input-field"
           value={club}
           onChange={e => setClub(e.target.value)}
-          placeholder="한강다트클럽"
+          placeholder="위로"
         />
       </div>
       <div>
@@ -64,7 +64,7 @@ export default function RegistrationForm({ eventId, onSuccess }: Props) {
           step="0.01"
           value={rating}
           onChange={e => setRating(e.target.value)}
-          placeholder="15.00"
+          placeholder="10.00"
           required
         />
       </div>
