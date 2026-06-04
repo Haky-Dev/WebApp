@@ -18,25 +18,35 @@ export default function AdminPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
+  const [isMaster, setIsMaster] = useState(false)
   const [tab, setTab] = useState<Tab>('participants')
   const [animationPairs, setAnimationPairs] = useState<{ a: Participant; b: Participant }[] | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [eventStatus, setEventStatus] = useState<EventStatus>('collecting')
+  const [eventName, setEventName] = useState<string>('')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem(`admin_token_${id}`)
-                ?? localStorage.getItem('master_token')
-    if (saved) setToken(saved)
+    const adminSaved = localStorage.getItem(`admin_token_${id}`)
+    const masterSaved = localStorage.getItem('master_token')
+    if (adminSaved) {
+      setToken(adminSaved)
+    } else if (masterSaved) {
+      setToken(masterSaved)
+      setIsMaster(true)
+    }
   }, [])
 
   useEffect(() => {
     fetch(`/api/events/${id}`)
       .then(r => r.json())
-      .then(data => { if (data.status) setEventStatus(data.status) })
+      .then(data => {
+        if (data.status) setEventStatus(data.status)
+        if (data.name) setEventName(data.name)
+      })
   }, [id])
 
   function handleTokenSet(t: string) {
@@ -167,11 +177,11 @@ export default function AdminPage() {
             >
               ← 홈
             </button>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 5 }}>
-              🔒 주최자 모드
+            <div style={{ fontSize: 11, fontWeight: 800, color: isMaster ? 'var(--neon-cyan)' : 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 5 }}>
+              {isMaster ? '⚡ 마스터 모드' : '🔒 주최자 모드'}
             </div>
             <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
-              {id.slice(0, 8)}...
+              {eventName || id.slice(0, 8) + '...'}
             </div>
           </div>
           {token && (
