@@ -39,7 +39,7 @@ export default function MyPartnerTab({ pairs, participantId }: Props) {
           내 파트너
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
-          팀 {myPair.team_number}
+          {myPair.group_label ?? `팀 ${myPair.team_number}`}
         </div>
         <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: 5 }}>
           {partner.name}

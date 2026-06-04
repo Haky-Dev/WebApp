@@ -47,7 +47,7 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 800, color: highlight ? 'var(--neon-cyan)' : color, marginBottom: 8 }}>
-                팀 {pair.team_number}{highlight ? ' ← 내 팀' : ''}
+                {pair.group_label ?? `팀 ${pair.team_number}`}{highlight ? ' ← 내 팀' : ''}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
