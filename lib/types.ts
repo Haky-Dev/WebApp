@@ -1,4 +1,4 @@
-export type EventStatus = 'collecting' | 'closed'
+export type EventStatus = 'collecting' | 'drawing' | 'closed'
 
 export interface TournamentEvent {
   id: string
@@ -26,6 +26,7 @@ export interface Pair {
   id: string
   event_id: string
   team_number: number
+  group_label: string | null
   participant_a_id: string
   participant_b_id: string
   participant_a?: Participant
