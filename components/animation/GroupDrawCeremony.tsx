@@ -20,6 +20,26 @@ const bracket: React.CSSProperties = {
   borderColor: 'rgba(57,255,20,0.4)', borderStyle: 'solid',
 }
 
+function Scan() {
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.35,
+      background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.22) 3px,rgba(0,0,0,0.22) 4px)',
+    }} />
+  )
+}
+
+function Brackets() {
+  return (
+    <>
+      <div style={{ ...bracket, top: 16, left: 16, borderRight: 0, borderBottom: 0, borderWidth: 2 }} />
+      <div style={{ ...bracket, top: 16, right: 16, borderLeft: 0, borderBottom: 0, borderWidth: 2 }} />
+      <div style={{ ...bracket, bottom: 16, left: 16, borderRight: 0, borderTop: 0, borderWidth: 2 }} />
+      <div style={{ ...bracket, bottom: 16, right: 16, borderLeft: 0, borderTop: 0, borderWidth: 2 }} />
+    </>
+  )
+}
+
 export default function GroupDrawCeremony({ groups, publishing, onPublish }: Props) {
   const [stage, setStage] = useState<Stage>('grid')
   const [groupIdx, setGroupIdx] = useState(0)
@@ -91,21 +111,6 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
     position: 'fixed', inset: 0, background: '#010101', color: '#f1f5f9',
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   }
-  const Scan = () => (
-    <div style={{
-      position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.35,
-      background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.22) 3px,rgba(0,0,0,0.22) 4px)',
-    }} />
-  )
-  const Brackets = () => (
-    <>
-      <div style={{ ...bracket, top: 16, left: 16, borderRight: 0, borderBottom: 0, borderWidth: 2 }} />
-      <div style={{ ...bracket, top: 16, right: 16, borderLeft: 0, borderBottom: 0, borderWidth: 2 }} />
-      <div style={{ ...bracket, bottom: 16, left: 16, borderRight: 0, borderTop: 0, borderWidth: 2 }} />
-      <div style={{ ...bracket, bottom: 16, right: 16, borderLeft: 0, borderTop: 0, borderWidth: 2 }} />
-    </>
-  )
-
   // ② 그룹 선택
   if (stage === 'grid') {
     return (
