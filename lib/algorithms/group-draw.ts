@@ -61,3 +61,41 @@ export function buildGroups(participants: Participant[], teamsPerGroup: number):
 
   return groups
 }
+
+export interface DrawnTeam {
+  label: string       // "A1"
+  a: Participant      // 상위
+  b: Participant      // 하위
+}
+
+export interface DrawnGroup {
+  letter: string      // "A"
+  teams: DrawnTeam[]
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+/**
+ * buildGroups로 그룹을 나눈 뒤, 그룹 내에서 상위·하위를 무작위로 짝지어 팀을 만든다.
+ * (그룹 멤버십은 결정적, 짝짓기만 랜덤)
+ */
+export function groupDraw(participants: Participant[], teamsPerGroup: number): DrawnGroup[] {
+  const groups = buildGroups(participants, teamsPerGroup)
+  return groups.map((g) => {
+    const tops = shuffle(g.tops)
+    const bottoms = shuffle(g.bottoms)
+    const teams: DrawnTeam[] = tops.map((top, i) => ({
+      label: `${g.letter}${i + 1}`,
+      a: top,
+      b: bottoms[i],
+    }))
+    return { letter: g.letter, teams }
+  })
+}

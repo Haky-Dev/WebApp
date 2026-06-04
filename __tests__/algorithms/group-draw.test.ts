@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildGroups } from '@/lib/algorithms/group-draw'
+import { buildGroups, groupDraw } from '@/lib/algorithms/group-draw'
 import type { Participant } from '@/lib/types'
 
 function makeParticipants(ratings: number[]): Participant[] {
@@ -52,5 +52,36 @@ describe('buildGroups', () => {
 
   it('홀수 인원이면 에러를 던진다', () => {
     expect(() => buildGroups(makeParticipants([10, 20, 30]), 6)).toThrow('Odd number of participants')
+  })
+})
+
+describe('groupDraw', () => {
+  it('각 그룹의 모든 멤버가 정확히 한 팀씩 구성된다', () => {
+    const ps = makeParticipants(Array.from({ length: 24 }, (_, i) => 24 - i))
+    const groups = groupDraw(ps, 6)
+    const ids = groups.flatMap(g => g.teams.flatMap(t => [t.a.id, t.b.id]))
+    expect(ids.sort()).toEqual(ps.map(p => p.id).sort())
+  })
+
+  it('팀의 a는 그룹 상위, b는 그룹 하위에서 나온다', () => {
+    const ps = makeParticipants(Array.from({ length: 12 }, (_, i) => 12 - i)) // 한 그룹(N6)
+    const groups = groupDraw(ps, 6)
+    const topRatings = new Set([12, 11, 10, 9, 8, 7])
+    const bottomRatings = new Set([6, 5, 4, 3, 2, 1])
+    for (const t of groups[0].teams) {
+      expect(topRatings.has(t.a.rating)).toBe(true)
+      expect(bottomRatings.has(t.b.rating)).toBe(true)
+    }
+  })
+
+  it('팀 라벨은 그룹문자+순번 (A1, A2 …)', () => {
+    const ps = makeParticipants(Array.from({ length: 24 }, (_, i) => 24 - i))
+    const groups = groupDraw(ps, 6)
+    expect(groups[0].teams.map(t => t.label)).toEqual(['A1', 'A2', 'A3', 'A4', 'A5', 'A6'])
+    expect(groups[1].teams[0].label).toBe('B1')
+  })
+
+  it('홀수 인원이면 에러를 던진다', () => {
+    expect(() => groupDraw(makeParticipants([10, 20, 30]), 6)).toThrow('Odd number of participants')
   })
 })
