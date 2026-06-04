@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { resolveEventId } from '@/lib/auth/admin-token'
 import { snakeDraft } from '@/lib/algorithms/snake-draft'
-import { groupRandom } from '@/lib/algorithms/group-random'
 import { groupDraw, type DrawnGroup } from '@/lib/algorithms/group-draw'
 import type { Participant } from '@/lib/types'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { algorithm, groupCount, teamsPerGroup, excludeId, tempParticipant } = body
+  const { algorithm, teamsPerGroup, excludeId, tempParticipant } = body
 
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -66,8 +65,6 @@ export async function POST(req: NextRequest) {
   try {
     if (algorithm === 'snake') {
       pairs = snakeDraft(participants)
-    } else if (algorithm === 'group-random') {
-      pairs = groupRandom(participants, groupCount as 2 | 4)
     } else if (algorithm === 'group-draw') {
       drawnGroups = groupDraw(participants, Number(teamsPerGroup))
       pairs = []
