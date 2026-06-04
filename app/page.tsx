@@ -190,6 +190,64 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* 토너먼트 개설 모달 */}
+        {showCreateModal && (
+          <div className="modal-overlay">
+            <form
+              className="modal-panel"
+              style={{ borderTop: '2px solid var(--neon-cyan)' }}
+              onSubmit={handleCreate}
+            >
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+                🏆 토너먼트 개설
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 18 }}>
+                새 토너먼트 만들기
+              </div>
+              <label className="field-label">토너먼트 이름</label>
+              <input
+                className="input-field"
+                style={{ marginBottom: 12 }}
+                placeholder="예: 봄 클럽 드래프트"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                autoFocus
+              />
+              <label className="field-label">관리자 PIN (4자리 이상)</label>
+              <input
+                type="password"
+                className="input-field"
+                style={{ marginBottom: 12, letterSpacing: '6px' }}
+                placeholder="••••"
+                value={pin}
+                onChange={e => setPin(e.target.value)}
+                required
+                minLength={4}
+              />
+              {createError && (
+                <p style={{ color: 'var(--accent-danger)', fontSize: 12, fontWeight: 700, marginBottom: 12 }}>{createError}</p>
+              )}
+              <button type="submit" disabled={creating} className="btn-cta" style={{ marginBottom: 10 }}>
+                {creating ? '생성 중...' : '+ 만들기'}
+              </button>
+              <button
+                type="button"
+                className="btn-ghost"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setName('')
+                  setPin('')
+                  setCreateError('')
+                }}
+              >
+                취소
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* 이벤트별 어드민 PIN 모달 */}
         {adminTarget && (
           <AdminPinModal
