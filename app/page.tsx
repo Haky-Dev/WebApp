@@ -279,7 +279,11 @@ export default function HomePage() {
         )}
 
         {/* 토너먼트 목록 */}
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 10 }}>
+        <div
+          style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 10, cursor: 'default', userSelect: 'none' }}
+          onMouseDown={startCreatePress} onMouseUp={endCreatePress} onMouseLeave={endCreatePress}
+          onTouchStart={startCreatePress} onTouchEnd={endCreatePress} onTouchCancel={endCreatePress}
+        >
           진행 중인 토너먼트
         </div>
 
