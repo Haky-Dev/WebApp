@@ -1,19 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type { Participant, EventStatus, Club } from '@/lib/types'
+import type { DrawnGroup } from '@/lib/algorithms/group-draw'
 
 interface Props {
   token: string
   eventId: string
   eventStatus: EventStatus
   onAssignStart: (pairs: { a: Participant; b: Participant }[]) => void
+  onGroupDrawStart: (groups: DrawnGroup[]) => void
   onReset: () => void
 }
 
-export default function AssignmentPanel({ token, eventId, eventStatus, onAssignStart, onReset }: Props) {
+export default function AssignmentPanel({ token, eventId, eventStatus, onAssignStart, onGroupDrawStart, onReset }: Props) {
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [algorithm, setAlgorithm] = useState<'snake' | 'group-random'>('snake')
-  const [groupCount, setGroupCount] = useState<2 | 4>(2)
+  const [algorithm, setAlgorithm] = useState<'snake' | 'group-draw'>('snake')
+  const [teamsPerGroup, setTeamsPerGroup] = useState(6)
   const [excludeId, setExcludeId] = useState<string>('')
   const [tempName, setTempName] = useState('')
   const [tempClub, setTempClub] = useState('')
@@ -34,7 +36,8 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
   async function handleAssign() {
     setError('')
     setLoading(true)
-    const body: Record<string, unknown> = { algorithm, groupCount, eventId }
+    const body: Record<string, unknown> = { algorithm, eventId }
+    if (algorithm === 'group-draw') body.teamsPerGroup = teamsPerGroup
     if (excludeId) body.excludeId = excludeId
     if (tempName) body.tempParticipant = { name: tempName, club: tempClub || null, rating: parseFloat(tempRating) }
 
@@ -43,8 +46,14 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
+    if (!res.ok) { const d = await res.json(); setError(d.error); setLoading(false); return }
+    const data = await res.json()
     setLoading(false)
-    if (!res.ok) { const d = await res.json(); setError(d.error); return }
+
+    if (algorithm === 'group-draw') {
+      onGroupDrawStart(data.groups as DrawnGroup[])
+      return
+    }
     const pairsRes = await fetch(`/api/pairs/${eventId}`)
     const pairsData = await pairsRes.json()
     onAssignStart(pairsData.map((p: { participant_a: Participant; participant_b: Participant }) => ({
@@ -105,37 +114,28 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
       <div>
         <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>배정 방식</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {(['snake', 'group-random'] as const).map(alg => (
+          {(['snake', 'group-draw'] as const).map(alg => (
             <label key={alg} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <input type="radio" checked={algorithm === alg} onChange={() => setAlgorithm(alg)} />
               <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-                {alg === 'snake' ? '스네이크 드래프트' : '그룹 랜덤'}
+                {alg === 'snake' ? '레이팅 순' : '그룹 팀 추첨'}
               </span>
             </label>
           ))}
         </div>
-        {algorithm === 'group-random' && (
+        {algorithm === 'group-draw' && (
           <div style={{ marginTop: 12, marginLeft: 24 }}>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>그룹 수</p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {([2, 4] as const).map(g => (
-                <button
-                  key={g}
-                  onClick={() => setGroupCount(g)}
-                  style={{
-                    padding: '8px 20px',
-                    borderRadius: 6,
-                    fontSize: 14,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                    background: groupCount === g ? 'var(--accent)' : 'var(--bg-surface)',
-                    color: groupCount === g ? '#fff' : 'var(--text-muted)',
-                    border: `1.5px solid ${groupCount === g ? 'var(--accent)' : 'var(--border)'}`,
-                  }}
-                >
-                  {g}
-                </button>
-              ))}
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>그룹당 팀수</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button
+                onClick={() => setTeamsPerGroup(v => Math.max(2, v - 1))}
+                style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
+              >−</button>
+              <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--accent)', minWidth: 32, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{teamsPerGroup}</span>
+              <button
+                onClick={() => setTeamsPerGroup(v => Math.min(20, v + 1))}
+                style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
+              >+</button>
             </div>
           </div>
         )}
