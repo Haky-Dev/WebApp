@@ -154,7 +154,7 @@ export default function RegisterPage() {
     </div>
   )
 
-  if (event.status === 'closed' && !registered) {
+  if (event.status !== 'collecting' && !registered) {
     return (
       <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ maxWidth: 384, width: '100%', padding: '24px' }}>
