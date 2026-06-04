@@ -40,7 +40,7 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
     const res = await fetch('/api/admin/participants', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ name: addName, club: addClub, rating: parseFloat(addRating) }),
+      body: JSON.stringify({ name: addName, club: addClub, rating: parseFloat(addRating), eventId }),
     })
     setAdding(false)
     if (!res.ok) { const d = await res.json(); setAddError(d.error); return }

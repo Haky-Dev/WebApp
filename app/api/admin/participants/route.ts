@@ -7,10 +7,10 @@ export async function POST(req: NextRequest) {
   const token = authHeader?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const eventId = await resolveEventId(token)
-  if (!eventId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { name, club, rating, eventId: bodyEventId } = await req.json()
 
-  const { name, club, rating } = await req.json()
+  const eventId = await resolveEventId(token, bodyEventId)
+  if (!eventId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   if (!name?.trim()) {
     return NextResponse.json({ error: 'name required' }, { status: 400 })
