@@ -14,6 +14,7 @@ export async function GET(
       id,
       event_id,
       team_number,
+      group_label,
       participant_a_id,
       participant_b_id,
       participant_a:participants!pairs_participant_a_id_fkey(id, name, club, rating),
