@@ -5,7 +5,9 @@ import AdminPinModal from '@/components/admin/AdminPinModal'
 import AdminParticipantPanel from '@/components/admin/AdminParticipantPanel'
 import AssignmentPanel from '@/components/admin/AssignmentPanel'
 import AssignmentAnimation from '@/components/animation/AssignmentAnimation'
+import GroupDrawCeremony from '@/components/animation/GroupDrawCeremony'
 import type { Participant, EventStatus } from '@/lib/types'
+import type { DrawnGroup } from '@/lib/algorithms/group-draw'
 
 type Tab = 'participants' | 'assign'
 
@@ -21,6 +23,8 @@ export default function AdminPage() {
   const [isMaster, setIsMaster] = useState(false)
   const [tab, setTab] = useState<Tab>('participants')
   const [animationPairs, setAnimationPairs] = useState<{ a: Participant; b: Participant }[] | null>(null)
+  const [ceremonyGroups, setCeremonyGroups] = useState<DrawnGroup[] | null>(null)
+  const [publishing, setPublishing] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -58,6 +62,18 @@ export default function AdminPage() {
     router.push(`/events/${id}/results`)
   }
 
+  async function handlePublish() {
+    if (!token) return
+    setPublishing(true)
+    const res = await fetch('/api/admin/publish', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId: id }),
+    })
+    setPublishing(false)
+    if (res.ok) router.push(`/events/${id}/results`)
+  }
+
   async function handleDelete() {
     if (!token) return
     setDeleting(true)
@@ -87,6 +103,7 @@ export default function AdminPage() {
     setResetting(false)
     if (res.ok) {
       setEventStatus('collecting')
+      setCeremonyGroups(null)
       setShowResetConfirm(false)
       setTab('participants')
     }
@@ -94,6 +111,10 @@ export default function AdminPage() {
 
   if (animationPairs) {
     return <AssignmentAnimation pairs={animationPairs} onEnd={handleAnimationEnd} />
+  }
+
+  if (ceremonyGroups) {
+    return <GroupDrawCeremony groups={ceremonyGroups} publishing={publishing} onPublish={handlePublish} />
   }
 
   return (
@@ -232,13 +253,27 @@ export default function AdminPage() {
           <>
             {tab === 'participants' && <AdminParticipantPanel token={token} eventId={id} />}
             {tab === 'assign' && (
-              <AssignmentPanel
-                token={token}
-                eventId={id}
-                eventStatus={eventStatus}
-                onAssignStart={(pairs) => { setEventStatus('closed'); setAnimationPairs(pairs) }}
-                onReset={handleReset}
-              />
+              eventStatus === 'drawing' ? (
+                <div style={{ padding: 16, background: 'var(--bg-surface)', border: '1.5px solid var(--neon-cyan)', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--neon-cyan)' }}>추첨이 진행 중입니다 (결과 비공개)</p>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6 }}>
+                    결과를 발표하면 참가자 기기에 자동으로 표시됩니다.
+                  </p>
+                  <button onClick={handlePublish} disabled={publishing} className="btn-cta">
+                    {publishing ? '발표 중...' : '결과 발표 ✓'}
+                  </button>
+                  <button onClick={() => setShowResetConfirm(true)} className="btn-ghost">배정 초기화</button>
+                </div>
+              ) : (
+                <AssignmentPanel
+                  token={token}
+                  eventId={id}
+                  eventStatus={eventStatus}
+                  onAssignStart={(pairs) => { setEventStatus('closed'); setAnimationPairs(pairs) }}
+                  onGroupDrawStart={(groups) => { setEventStatus('drawing'); setCeremonyGroups(groups) }}
+                  onReset={handleReset}
+                />
+              )
             )}
           </>
         )}
