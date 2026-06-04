@@ -11,7 +11,7 @@ export default function CopyButton({ pairs }: Props) {
     const header = '팀\t파트너A 이름\t파트너A 동호회\t파트너A 레이팅\t파트너B 이름\t파트너B 동호회\t파트너B 레이팅'
     const rows = pairs.map(p =>
       [
-        p.team_number,
+        p.group_label ?? p.team_number,
         p.participant_a?.name ?? '',
         p.participant_a?.club ?? '',
         p.participant_a?.rating.toFixed(2) ?? '',

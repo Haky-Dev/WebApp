@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { resolveEventId } from '@/lib/auth/admin-token'
 import { snakeDraft } from '@/lib/algorithms/snake-draft'
-import { groupRandom } from '@/lib/algorithms/group-random'
+import { groupDraw, type DrawnGroup } from '@/lib/algorithms/group-draw'
 import type { Participant } from '@/lib/types'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { algorithm, groupCount, excludeId, tempParticipant } = body
+  const { algorithm, teamsPerGroup, excludeId, tempParticipant } = body
 
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -59,12 +59,21 @@ export async function POST(req: NextRequest) {
   }
 
   // Run algorithm
-  let pairs
+  let pairs: { a: Participant; b: Participant }[]
+  let drawnGroups: DrawnGroup[] | null = null
+  const labelByPairIndex: (string | null)[] = []
   try {
     if (algorithm === 'snake') {
       pairs = snakeDraft(participants)
-    } else if (algorithm === 'group-random') {
-      pairs = groupRandom(participants, groupCount as 2 | 4)
+    } else if (algorithm === 'group-draw') {
+      drawnGroups = groupDraw(participants, Number(teamsPerGroup))
+      pairs = []
+      for (const g of drawnGroups) {
+        for (const t of g.teams) {
+          pairs.push({ a: t.a, b: t.b })
+          labelByPairIndex.push(t.label)
+        }
+      }
     } else {
       return NextResponse.json({ error: 'Unknown algorithm' }, { status: 400 })
     }
@@ -96,6 +105,7 @@ export async function POST(req: NextRequest) {
   const pairRows = pairs.map((p, i) => ({
     event_id: eventId,
     team_number: i + 1,
+    group_label: labelByPairIndex[i] ?? null,
     participant_a_id: p.a.id,
     participant_b_id: p.b.id,
   }))
@@ -103,7 +113,11 @@ export async function POST(req: NextRequest) {
   const { error: insertErr } = await supabase.from('pairs').insert(pairRows)
   if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
 
-  await supabase.from('events').update({ status: 'closed' }).eq('id', eventId)
+  const nextStatus = algorithm === 'group-draw' ? 'drawing' : 'closed'
+  await supabase.from('events').update({ status: nextStatus }).eq('id', eventId)
 
-  return NextResponse.json({ success: true, teamCount: pairs.length })
+  if (algorithm === 'group-draw') {
+    return NextResponse.json({ success: true, status: 'drawing', groups: drawnGroups })
+  }
+  return NextResponse.json({ success: true, status: 'closed', teamCount: pairs.length })
 }
