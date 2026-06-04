@@ -262,8 +262,8 @@ export default function HomePage() {
           <div>
             <div
               style={{ marginBottom: 8, cursor: 'pointer', userSelect: 'none' }}
-              onMouseDown={startPress} onMouseUp={endPress}
-              onTouchStart={startPress} onTouchEnd={endPress} onTouchCancel={endPress}
+              onMouseDown={startCreatePress} onMouseUp={endCreatePress} onMouseLeave={endCreatePress}
+              onTouchStart={startCreatePress} onTouchEnd={endCreatePress} onTouchCancel={endCreatePress}
             >
               <LogoType />
             </div>
@@ -271,7 +271,12 @@ export default function HomePage() {
               드래프트<br />매니저{isMasterAdmin && ' 🔑'}
             </div>
           </div>
-          <ThemeToggle />
+          <div
+              onMouseDown={startPress} onMouseUp={endPress} onMouseLeave={endPress}
+              onTouchStart={startPress} onTouchEnd={endPress} onTouchCancel={endPress}
+            >
+              <ThemeToggle />
+            </div>
         </div>
 
         {/* 마스터 어드민 패널 */}
@@ -337,11 +342,7 @@ export default function HomePage() {
         )}
 
         {/* 토너먼트 목록 */}
-        <div
-          style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 10, cursor: 'default', userSelect: 'none' }}
-          onMouseDown={startCreatePress} onMouseUp={endCreatePress} onMouseLeave={endCreatePress}
-          onTouchStart={startCreatePress} onTouchEnd={endCreatePress} onTouchCancel={endCreatePress}
-        >
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 10 }}>
           진행 중인 토너먼트
         </div>
 
