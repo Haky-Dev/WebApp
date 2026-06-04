@@ -66,6 +66,8 @@ export default function HomePage() {
   const [clubError, setClubError] = useState('')
 
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const createPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     fetch('/api/events').then(r => r.json()).then(setEvents)
@@ -147,6 +149,14 @@ export default function HomePage() {
   }
   function endPress() {
     if (pressTimer.current) clearTimeout(pressTimer.current)
+  }
+
+  function startCreatePress() {
+    if (showCreateModal) return
+    createPressTimer.current = setTimeout(() => setShowCreateModal(true), 3000)
+  }
+  function endCreatePress() {
+    if (createPressTimer.current) clearTimeout(createPressTimer.current)
   }
 
   return (
