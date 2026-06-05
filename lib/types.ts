@@ -36,5 +36,6 @@ export interface Pair {
 export interface Club {
   id: string
   name: string
+  color: string | null
   created_at: string
 }
