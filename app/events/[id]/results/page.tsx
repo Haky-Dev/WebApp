@@ -6,6 +6,7 @@ import AllResultsTab from '@/components/results/AllResultsTab'
 import CopyButton from '@/components/results/CopyButton'
 import AdminPinModal from '@/components/admin/AdminPinModal'
 import PartnerRevealAnimation from '@/components/results/PartnerRevealAnimation'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 import type { Pair, Participant } from '@/lib/types'
 
 type Tab = 'my' | 'all'
@@ -27,6 +28,7 @@ export default function ResultsPage() {
   const participantId = searchParams.get('p') ||
     (typeof window !== 'undefined' ? localStorage.getItem('my_participant_id') : null)
 
+  const isDesktop = useIsDesktop()
   const [pairs, setPairs] = useState<Pair[]>([])
   const [tab, setTab] = useState<Tab>(participantId ? 'my' : 'all')
   const [adminToken, setAdminToken] = useState<string | null>(null)
@@ -74,7 +76,7 @@ export default function ResultsPage() {
           }
         }
       })
-    setAdminToken(localStorage.getItem(`admin_token_${id}`))
+    setAdminToken(localStorage.getItem(`admin_token_${id}`) || localStorage.getItem('master_token'))
   }, [id])
 
   function handleRevealEnd() {
@@ -87,7 +89,8 @@ export default function ResultsPage() {
     setResetting(true)
     const res = await fetch('/api/admin/pairs', {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${adminToken}` },
+      headers: { Authorization: `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId: id }),
     })
     setResetting(false)
     if (res.ok) {
@@ -108,7 +111,11 @@ export default function ResultsPage() {
 
   return (
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
+      <div style={{
+        maxWidth: isDesktop ? 1100 : 512,
+        margin: '0 auto',
+        padding: isDesktop ? '40px 48px' : '24px',
+      }}>
 
         {showPinModal && (
           <AdminPinModal
