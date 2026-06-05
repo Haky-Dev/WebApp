@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import type { Pair } from '@/lib/types'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
-import RatingBadge from '@/components/ui/RatingBadge'
 import { useClubColors } from '@/hooks/useClubColors'
+import RatingBadge from '@/components/ui/RatingBadge'
 import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props { pairs: Pair[]; highlightId?: string | null }
@@ -11,23 +11,48 @@ interface Props { pairs: Pair[]; highlightId?: string | null }
 type SortOption = 'team' | 'rating_desc' | 'rating_asc'
 
 const NEON_COLORS = ['var(--neon-pink)', 'var(--neon-green)', 'var(--neon-cyan)']
-function teamColor(index: number) { return NEON_COLORS[index % NEON_COLORS.length] }
+
+function pairColor(pair: Pair, originalIndex: number): string {
+  if (pair.group_label) {
+    const letterIdx = pair.group_label.charCodeAt(0) - 65 // 'A' = 65
+    return NEON_COLORS[Math.max(0, letterIdx) % NEON_COLORS.length]
+  }
+  return NEON_COLORS[originalIndex % NEON_COLORS.length]
+}
 
 function combinedRating(pair: Pair): number {
   return (pair.participant_a?.rating ?? 0) + (pair.participant_b?.rating ?? 0)
 }
 
-function ParticipantInfo({
-  name, club, rating, isDesktop, clubColor,
-}: { name: string; club: string | null; rating: number; isDesktop: boolean; clubColor?: string }) {
+function MemberCard({
+  name, club, rating, isDesktop, color, isMe, clubColor,
+}: {
+  name: string; club: string | null; rating: number
+  isDesktop: boolean; color: string; isMe: boolean; clubColor?: string
+}) {
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {club && <ClubBadge name={club} color={clubColor} fontSize={isDesktop ? 12 : 10} />}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <span style={{ fontSize: isDesktop ? 20 : 15, fontWeight: 800, color: 'var(--text-primary)' }}>
-          {name}
+    <div
+      className="card-surface"
+      style={{
+        flex: 1,
+        padding: isDesktop ? '12px 14px' : '9px 11px',
+        borderLeft: `3px solid ${isMe ? 'var(--neon-cyan)' : color}`,
+        background: isMe ? 'var(--accent-bg)' : 'var(--bg-surface)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+      }}
+    >
+      {club && <ClubBadge name={club} color={clubColor} fontSize={isDesktop ? 11 : 10} />}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, flexWrap: 'wrap' }}>
+        <span style={{
+          fontSize: isDesktop ? 18 : 14,
+          fontWeight: 800,
+          color: isMe ? 'var(--neon-cyan)' : 'var(--text-primary)',
+        }}>
+          {name}{isMe ? ' ←' : ''}
         </span>
-        <RatingBadge rating={rating} fontSize={isDesktop ? 14 : 11} />
+        <RatingBadge rating={rating} fontSize={isDesktop ? 13 : 11} />
       </div>
     </div>
   )
@@ -122,52 +147,41 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
         )}
       </div>
 
-      {/* 카드 그리드 */}
+      {/* 팀 그리드 */}
       <div style={isDesktop
         ? { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }
-        : { display: 'flex', flexDirection: 'column', gap: 7 }
+        : { display: 'flex', flexDirection: 'column', gap: 10 }
       }>
         {sorted.map((pair) => {
-          const highlight =
-            pair.participant_a_id === highlightId ||
-            pair.participant_b_id === highlightId
+          const isHighlightA = pair.participant_a_id === highlightId
+          const isHighlightB = pair.participant_b_id === highlightId
           const originalIndex = pairs.indexOf(pair)
-          const color = teamColor(originalIndex)
+          const color = pairColor(pair, originalIndex)
           const combined = combinedRating(pair).toFixed(2)
           return (
-            <div
-              key={pair.id}
-              className="card-surface"
-              style={{
-                padding: '11px 14px',
-                borderLeft: `3px solid ${highlight ? 'var(--neon-cyan)' : color}`,
-                background: highlight ? 'var(--accent-bg)' : 'var(--bg-surface)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: highlight ? 'var(--neon-cyan)' : color }}>
-                  {pair.group_label ?? `팀 ${pair.team_number}`}{highlight ? ' ← 내 팀' : ''}
-                </div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)' }}>
-                  합산 {combined}
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <ParticipantInfo
+            <div key={pair.id} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <div style={{ display: 'flex', gap: 5 }}>
+                <MemberCard
                   name={pair.participant_a?.name ?? ''}
                   club={pair.participant_a?.club ?? null}
                   rating={pair.participant_a?.rating ?? 0}
                   isDesktop={isDesktop}
+                  color={color}
+                  isMe={isHighlightA}
                   clubColor={pair.participant_a?.club ? clubColors.get(pair.participant_a.club) : undefined}
                 />
-                <span style={{ color: 'var(--text-muted)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>×</span>
-                <ParticipantInfo
+                <MemberCard
                   name={pair.participant_b?.name ?? ''}
                   club={pair.participant_b?.club ?? null}
                   rating={pair.participant_b?.rating ?? 0}
                   isDesktop={isDesktop}
+                  color={color}
+                  isMe={isHighlightB}
                   clubColor={pair.participant_b?.club ? clubColors.get(pair.participant_b.club) : undefined}
                 />
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textAlign: 'right', paddingRight: 2 }}>
+                합산 {combined}
               </div>
             </div>
           )
