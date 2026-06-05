@@ -249,17 +249,17 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                     background: `linear-gradient(135deg, rgba(10,10,10,0.95), ${teamColorRgba(i)})`,
                     border: `1px solid ${teamColor(i)}25`,
                     borderRadius: 8,
-                    padding: isDesktop ? '10px 14px' : '8px 10px',
-                    minWidth: isDesktop ? 160 : 130,
+                    padding: isDesktop ? '14px 18px' : '8px 10px',
+                    minWidth: isDesktop ? 200 : 130,
                     animation: 'slideUp 0.4s ease both',
                   }}>
-                    <div style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, color: teamColor(i), letterSpacing: '2px', marginBottom: isDesktop ? 4 : 3 }}>
+                    <div style={{ fontSize: isDesktop ? 13 : 10, fontWeight: 800, color: teamColor(i), letterSpacing: '2px', marginBottom: isDesktop ? 6 : 3 }}>
                       팀 {i + 1}
                     </div>
-                    <div style={{ fontSize: isDesktop ? 16 : 13, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
+                    <div style={{ fontSize: isDesktop ? 20 : 13, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
                       {p.a.name} <span style={{ color: '#333', margin: '0 3px', fontWeight: 700 }}>×</span> {p.b.name}
                     </div>
-                    <div style={{ fontSize: isDesktop ? 11 : 10, color: '#444', marginTop: isDesktop ? 4 : 2 }}>
+                    <div style={{ fontSize: isDesktop ? 12 : 10, color: '#444', marginTop: isDesktop ? 5 : 2 }}>
                       합산 {combined}
                     </div>
                   </div>
