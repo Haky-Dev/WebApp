@@ -5,10 +5,10 @@ export function useIsDesktop(): boolean {
   const [isDesktop, setIsDesktop] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')
-    setIsDesktop(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+    const update = () => setIsDesktop(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
   }, [])
   return isDesktop
 }

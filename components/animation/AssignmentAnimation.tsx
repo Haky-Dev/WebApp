@@ -37,11 +37,6 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
 
   const names = pairs.map(p => p.b.name)
 
-  useEffect(() => {
-    runDrumroll(0)
-    return () => { if (spinInterval.current) clearTimeout(spinInterval.current) }
-  }, [])
-
   function runDrumroll(teamIdx: number) {
     if (teamIdx >= pairs.length) {
       setPhase('finale')
@@ -76,6 +71,11 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
     }
     tick()
   }
+
+  useEffect(() => {
+    runDrumroll(0)
+    return () => { if (spinInterval.current) clearTimeout(spinInterval.current) }
+  }, [])
 
   return (
     <div style={{
