@@ -159,7 +159,10 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
           const color = pairColor(pair, originalIndex)
           const combined = combinedRating(pair).toFixed(2)
           return (
-            <div key={pair.id} style={{ position: 'relative' }}>
+            <div key={pair.id} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <div style={{ textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#ffffff' }}>
+                합산 {combined}
+              </div>
               <div style={{ display: 'flex', gap: 5 }}>
                 <MemberCard
                   name={pair.participant_a?.name ?? ''}
@@ -179,9 +182,6 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                   isMe={isHighlightB}
                   clubColor={pair.participant_b?.club ? clubColors.get(pair.participant_b.club) : undefined}
                 />
-              </div>
-              <div style={{ position: 'absolute', top: 6, right: 8, fontSize: 11, fontWeight: 800, color: '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
-                합산 {combined}
               </div>
             </div>
           )
