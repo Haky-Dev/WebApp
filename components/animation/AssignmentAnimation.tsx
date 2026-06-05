@@ -241,7 +241,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
             overflowY: 'auto',
             position: 'relative', zIndex: 1,
           }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignContent: 'flex-start' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignContent: 'flex-start', justifyContent: 'center' }}>
               {revealedPairs.map((p, i) => {
                 const combined = ((p.a.rating ?? 0) + (p.b.rating ?? 0)).toFixed(2)
                 return (

@@ -333,7 +333,7 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
           padding: '8px 12px',
           overflowY: 'auto',
         }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignContent: 'flex-start' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignContent: 'flex-start', justifyContent: 'center' }}>
             {revealedTeams.map((t, i) => {
               const combined = ((t.a.rating ?? 0) + (t.b.rating ?? 0)).toFixed(2)
               return (
