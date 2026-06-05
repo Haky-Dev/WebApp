@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import confetti from 'canvas-confetti'
 import type { Participant } from '@/lib/types'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props {
   pairs: { a: Participant; b: Participant }[]
@@ -21,10 +22,6 @@ const TEAM_COLORS_RGBA = [
 function teamColor(i: number) { return TEAM_COLORS[i % TEAM_COLORS.length] }
 function teamColorRgba(i: number) { return TEAM_COLORS_RGBA[i % TEAM_COLORS_RGBA.length] }
 
-function participantLabel(p: Participant): string {
-  const club = p.club ? `${p.club} ` : ''
-  return `${club}${p.name} (${p.rating})`
-}
 
 export default function AssignmentAnimation({ pairs, onEnd }: Props) {
   const isDesktop = useIsDesktop()
@@ -108,9 +105,8 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
               {pairs[currentTeam]?.a.name}
             </div>
             <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginBottom: 4 }}>
-              {pairs[currentTeam]?.a.club
-                ? `${pairs[currentTeam].a.club} · ${pairs[currentTeam].a.rating}`
-                : String(pairs[currentTeam]?.a.rating ?? '')}
+              {pairs[currentTeam]?.a.club ? `${pairs[currentTeam].a.club} · ` : ''}
+              {pairs[currentTeam] && <RatingBadge rating={pairs[currentTeam].a.rating} fontSize={13} />}
             </div>
 
             <div style={{ fontSize: 16, color: '#444', fontWeight: 700, margin: '8px 0' }}>+</div>
@@ -130,9 +126,8 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
             </div>
             {spinPhase === 'locked' && pairs[currentTeam] && (
               <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginTop: 4 }}>
-                {pairs[currentTeam].b.club
-                  ? `${pairs[currentTeam].b.club} · ${pairs[currentTeam].b.rating}`
-                  : String(pairs[currentTeam].b.rating)}
+                {pairs[currentTeam].b.club ? `${pairs[currentTeam].b.club} · ` : ''}
+                <RatingBadge rating={pairs[currentTeam].b.rating} fontSize={13} />
               </div>
             )}
 
@@ -141,7 +136,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
               <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #111' }}>
                 {revealedPairs.map((p, i) => (
                   <div key={i} style={{ fontSize: 12, color: '#444', fontWeight: 700, marginBottom: 4 }}>
-                    팀{i + 1}: {participantLabel(p.a)} × {participantLabel(p.b)}
+                    팀{i + 1}: {p.a.club ? `${p.a.club} ` : ''}{p.a.name} (<RatingBadge rating={p.a.rating} fontSize={11} />) × {p.b.club ? `${p.b.club} ` : ''}{p.b.name} (<RatingBadge rating={p.b.rating} fontSize={11} />)
                   </div>
                 ))}
               </div>
@@ -188,7 +183,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                         {p.a.club && <div style={{ fontSize: 11, color: '#555', fontWeight: 400 }}>{p.a.club}</div>}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
                           <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.a.name}</span>
-                          <span style={{ fontSize: 12, color: '#555', fontWeight: 700 }}>{p.a.rating}</span>
+                          <RatingBadge rating={p.a.rating} fontSize={12} />
                         </div>
                       </div>
                       <span style={{ color: '#444', fontWeight: 700, flexShrink: 0 }}>×</span>
@@ -196,7 +191,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                         {p.b.club && <div style={{ fontSize: 11, color: '#555', fontWeight: 400 }}>{p.b.club}</div>}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
                           <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.b.name}</span>
-                          <span style={{ fontSize: 12, color: '#555', fontWeight: 700 }}>{p.b.rating}</span>
+                          <RatingBadge rating={p.b.rating} fontSize={12} />
                         </div>
                       </div>
                     </div>
