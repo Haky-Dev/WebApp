@@ -211,10 +211,9 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
     const activeTeam = group.teams[Math.min(activeIdx, group.teams.length - 1)]
     const teamNo = Math.min(activeIdx + 1, group.teams.length)
     const revealedTeams = group.teams.slice(0, phase === 'locked' ? revealCount : revealCount)
-    const hasCards = revealedTeams.length > 0
     const REEL_H = ITEM_H * VISIBLE
     const groupColor = colorFor(groupIdx)
-    const BOTTOM_H = isDesktop ? 200 : 145
+    const CARD_ZONE_H = isDesktop ? 110 : 80
 
     return (
       <div style={{ ...stageBox, justifyContent: undefined }}>
@@ -223,146 +222,98 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
           GROUP {group.letter} · 팀 {teamNo} / {group.teams.length}
         </div>
 
-        {/* 상단 스페이서 */}
-        <div style={{ height: BOTTOM_H, flexShrink: 0 }} />
+        {/* 소형 상단 여백 (헤더 absolute와 겹치지 않도록) */}
+        <div style={{ height: isDesktop ? 56 : 46, flexShrink: 0 }} />
 
-        {/* 슬롯 머신 영역: flex:1 */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-        <div style={{
-          textAlign: 'center',
-          padding: '0 24px',
-          maxWidth: isDesktop ? 560 : 400,
-          width: '100%',
-        }}>
-          {/* 퍼스트 */}
-          <div style={{ fontSize: 'clamp(30px,6.5vw,80px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
-            {activeTeam?.a.name}
-          </div>
-          <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginTop: 6, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {activeTeam?.a.club && (
-              <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={13} fontWeight={700} /><span>·</span></>
-            )}
-            {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={13} />}
-          </div>
+        {/* Zone B: 슬롯머신 + 버튼 — flex:1, 중앙 고정 */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', padding: `0 ${isDesktop ? 48 : 20}px` }}>
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: isDesktop ? 700 : 440 }}>
 
-          <div style={{ fontSize: 18, color: '#2a2a2a', fontWeight: 700, marginBottom: 16 }}>+</div>
+            {/* 왼쪽: 퍼스트 플레이어 */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
+              <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>FIRST</div>
+              <div style={{ fontSize: 'clamp(18px, 2.8vw, 38px)', fontWeight: 900, color: '#f1f5f9', textAlign: 'center', lineHeight: 1.1, letterSpacing: -1 }}>
+                {activeTeam?.a.name}
+              </div>
+              <div style={{ fontSize: 11, color: '#555', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {activeTeam?.a.club && (
+                  <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={11} fontWeight={700} /><span>·</span></>
+                )}
+                {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={11} />}
+              </div>
+            </div>
 
-          {/* Slot machine reel */}
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: 280,
-            margin: '0 auto',
-            height: REEL_H,
-            overflow: 'hidden',
-            borderRadius: 14,
-            background: 'rgba(0,0,0,0.6)',
-            border: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#111'}`,
-            boxShadow: phase === 'locked'
-              ? `0 0 32px ${groupColor}30, inset 0 0 20px ${groupColor}08`
-              : '0 0 20px rgba(0,0,0,0.8)',
-            transition: 'border-color 0.4s, box-shadow 0.4s',
-          }}>
-            {/* Center focus */}
-            <div style={{
-              position: 'absolute',
-              top: ITEM_H * CENTER,
-              left: 0, right: 0,
-              height: ITEM_H,
-              background: phase === 'locked' ? `${groupColor}0a` : 'rgba(255,255,255,0.02)',
-              borderTop: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
-              borderBottom: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
-              zIndex: 2, pointerEvents: 'none',
-              transition: 'background 0.4s, border-color 0.4s',
-            }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to bottom, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to top, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
+            {/* 구분자 */}
+            <div style={{ fontSize: isDesktop ? 22 : 16, color: '#555', fontWeight: 900, flexShrink: 0, padding: `0 ${isDesktop ? 18 : 10}px` }}>×</div>
 
-            <div ref={reelRef}>
-              {reelItems.map((name, i) => (
-                <div key={i} style={{
-                  height: ITEM_H,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 'clamp(20px, 3vw, 28px)',
-                  fontWeight: 900,
-                  color: phase === 'locked' && i === SPIN_BEFORE
-                    ? groupColor
-                    : name === '?' ? '#2a2a2a' : '#e2e8f0',
-                  textShadow: phase === 'locked' && i === SPIN_BEFORE
-                    ? `0 0 20px ${groupColor}, 0 0 40px ${groupColor}66`
-                    : 'none',
-                  animation: phase === 'locked' && i === SPIN_BEFORE ? 'spinBounce 0.3s ease both' : 'none',
-                  transition: 'color 0.3s, text-shadow 0.3s',
-                  userSelect: 'none',
-                  letterSpacing: '-0.5px',
-                }}>
-                  {name}
+            {/* 오른쪽: 세컨드 슬롯머신 */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
+              <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>SECOND</div>
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                height: REEL_H,
+                overflow: 'hidden',
+                borderRadius: 14,
+                background: 'rgba(0,0,0,0.6)',
+                border: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#111'}`,
+                boxShadow: phase === 'locked'
+                  ? `0 0 32px ${groupColor}30, inset 0 0 20px ${groupColor}08`
+                  : '0 0 20px rgba(0,0,0,0.8)',
+                transition: 'border-color 0.4s, box-shadow 0.4s',
+              }}>
+                <div style={{
+                  position: 'absolute', top: ITEM_H * CENTER, left: 0, right: 0, height: ITEM_H,
+                  background: phase === 'locked' ? `${groupColor}0a` : 'rgba(255,255,255,0.02)',
+                  borderTop: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
+                  borderBottom: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
+                  zIndex: 2, pointerEvents: 'none', transition: 'background 0.4s, border-color 0.4s',
+                }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to bottom, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to top, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
+                <div ref={reelRef}>
+                  {reelItems.map((name, i) => (
+                    <div key={i} style={{
+                      height: ITEM_H,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 'clamp(18px, 2.5vw, 26px)',
+                      fontWeight: 900,
+                      color: phase === 'locked' && i === SPIN_BEFORE
+                        ? groupColor
+                        : name === '?' ? '#2a2a2a' : '#e2e8f0',
+                      textShadow: phase === 'locked' && i === SPIN_BEFORE
+                        ? `0 0 20px ${groupColor}, 0 0 40px ${groupColor}66`
+                        : 'none',
+                      animation: phase === 'locked' && i === SPIN_BEFORE ? 'spinBounce 0.3s ease both' : 'none',
+                      transition: 'color 0.3s, text-shadow 0.3s',
+                      userSelect: 'none', letterSpacing: '-0.5px',
+                    }}>
+                      {name}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              {phase === 'locked' && activeTeam && (
+                <div style={{
+                  fontSize: 11, color: '#555', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap',
+                  animation: 'slideUp 0.3s ease both',
+                }}>
+                  {activeTeam.b.club && (
+                    <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={11} fontWeight={700} /><span>·</span></>
+                  )}
+                  <RatingBadge rating={activeTeam.b.rating} fontSize={11} />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Locked: B player info */}
-          {phase === 'locked' && activeTeam && (
-            <div style={{
-              fontSize: 13, color: '#555', fontWeight: 700,
-              marginTop: 8,
-              display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap',
-              animation: 'slideUp 0.3s ease both',
-            }}>
-              {activeTeam.b.club && (
-                <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={13} fontWeight={700} /><span>·</span></>
-              )}
-              <RatingBadge rating={activeTeam.b.rating} fontSize={13} />
-            </div>
-          )}
-        </div>
-        </div>{/* 슬롯 머신 영역 끝 */}
-
-        {/* 하단 영역: 항상 BOTTOM_H 높이 유지 → 레이아웃 이동 없음 */}
-        <div style={{
-          height: BOTTOM_H,
-          flexShrink: 0,
-          width: '100%',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: 10,
-          padding: '0 20px 24px',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)',
-          zIndex: 10,
-        }}>
-          {hasCards && (
-            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', width: '100%', scrollbarWidth: 'none', justifyContent: 'center' }}>
-              {revealedTeams.map((t, i) => {
-                const combined = ((t.a.rating ?? 0) + (t.b.rating ?? 0)).toFixed(2)
-                return (
-                  <div key={t.label} style={{
-                    flexShrink: 0,
-                    background: `linear-gradient(135deg, rgba(10,10,10,0.95), ${groupColor}15)`,
-                    border: `1px solid ${groupColor}25`,
-                    borderRadius: 10,
-                    padding: isDesktop ? '18px 26px' : '10px 14px',
-                    minWidth: isDesktop ? 320 : 170,
-                    animation: 'slideUp 0.4s ease both',
-                  }}>
-                    <div style={{ fontSize: isDesktop ? 14 : 11, fontWeight: 800, color: groupColor, letterSpacing: '2px', marginBottom: isDesktop ? 8 : 4 }}>
-                      {t.label}
-                    </div>
-                    <div style={{ fontSize: isDesktop ? 30 : 16, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-1px' }}>
-                      {t.a.name} <span style={{ color: '#333', margin: isDesktop ? '0 6px' : '0 3px', fontWeight: 700 }}>×</span> {t.b.name}
-                    </div>
-                    <div style={{ fontSize: isDesktop ? 13 : 10, color: '#444', marginTop: isDesktop ? 6 : 3 }}>합산 {combined}</div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
+          {/* 버튼 — 슬롯머신 바로 아래 (Zone B 내부) */}
           <button
             onClick={phase === 'idle' ? startSpin : phase === 'locked' ? proceed : undefined}
             disabled={phase === 'spinning'}
             className="btn-cta"
-            style={{ maxWidth: 320, width: '100%' }}
+            style={{ maxWidth: 320, width: '100%', marginTop: isDesktop ? 16 : 12 }}
           >
             {phase === 'spinning'
               ? 'DRAWING...'
@@ -372,6 +323,39 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
                   ? '다음 팀 →'
                   : '그룹 완료 ✓'}
           </button>
+        </div>
+
+        {/* Zone C: 카드 존 — 고정 높이, flex-wrap */}
+        <div style={{
+          height: CARD_ZONE_H,
+          flexShrink: 0,
+          width: '100%',
+          padding: '8px 12px',
+          overflowY: 'auto',
+        }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignContent: 'flex-start' }}>
+            {revealedTeams.map((t, i) => {
+              const combined = ((t.a.rating ?? 0) + (t.b.rating ?? 0)).toFixed(2)
+              return (
+                <div key={t.label} style={{
+                  background: `linear-gradient(135deg, rgba(10,10,10,0.95), ${groupColor}15)`,
+                  border: `1px solid ${groupColor}25`,
+                  borderRadius: 8,
+                  padding: isDesktop ? '10px 14px' : '8px 10px',
+                  minWidth: isDesktop ? 160 : 130,
+                  animation: 'slideUp 0.4s ease both',
+                }}>
+                  <div style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, color: groupColor, letterSpacing: '2px', marginBottom: isDesktop ? 4 : 3 }}>
+                    {t.label}
+                  </div>
+                  <div style={{ fontSize: isDesktop ? 16 : 13, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
+                    {t.a.name} <span style={{ color: '#333', margin: '0 3px', fontWeight: 700 }}>×</span> {t.b.name}
+                  </div>
+                  <div style={{ fontSize: isDesktop ? 11 : 10, color: '#444', marginTop: isDesktop ? 4 : 2 }}>합산 {combined}</div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     )
