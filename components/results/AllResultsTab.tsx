@@ -31,18 +31,16 @@ function MemberCard({
   isDesktop: boolean; color: string; isMe: boolean; clubColor?: string
 }) {
   return (
-    <div
-      className="card-surface"
-      style={{
-        flex: 1,
-        padding: isDesktop ? '12px 14px' : '9px 11px',
-        borderLeft: `3px solid ${isMe ? 'var(--neon-cyan)' : color}`,
-        background: isMe ? 'var(--accent-bg)' : 'var(--bg-surface)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-      }}
-    >
+    <div style={{
+      flex: 1,
+      padding: isDesktop ? '10px 12px' : '8px 10px',
+      borderRadius: 6,
+      borderLeft: `2px solid ${isMe ? 'var(--neon-cyan)' : color}`,
+      background: isMe ? 'var(--accent-bg)' : 'var(--bg-base)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3,
+    }}>
       {club && <ClubBadge name={club} color={clubColor} fontSize={isDesktop ? 11 : 10} />}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, flexWrap: 'wrap' }}>
         <span style={{
@@ -159,7 +157,17 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
           const color = pairColor(pair, originalIndex)
           const combined = combinedRating(pair).toFixed(2)
           return (
-            <div key={pair.id} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div
+              key={pair.id}
+              className="card-surface"
+              style={{
+                padding: isDesktop ? '12px 14px' : '10px 12px',
+                borderLeft: `3px solid ${color}`,
+              }}
+            >
+              <div style={{ textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#ffffff', marginBottom: 8 }}>
+                합산 {combined}
+              </div>
               <div style={{ display: 'flex', gap: 5 }}>
                 <MemberCard
                   name={pair.participant_a?.name ?? ''}
@@ -179,9 +187,6 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                   isMe={isHighlightB}
                   clubColor={pair.participant_b?.club ? clubColors.get(pair.participant_b.club) : undefined}
                 />
-              </div>
-              <div style={{ textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#ffffff' }}>
-                합산 {combined}
               </div>
             </div>
           )
