@@ -162,7 +162,6 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
               className="card-surface"
               style={{
                 padding: isDesktop ? '12px 14px' : '10px 12px',
-                borderLeft: `3px solid ${color}`,
               }}
             >
               <div style={{ textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#ffffff', marginBottom: 8 }}>
