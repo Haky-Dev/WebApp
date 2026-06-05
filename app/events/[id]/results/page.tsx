@@ -7,6 +7,7 @@ import CopyButton from '@/components/results/CopyButton'
 import AdminPinModal from '@/components/admin/AdminPinModal'
 import PartnerRevealAnimation from '@/components/results/PartnerRevealAnimation'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import { useRealtimeEvent } from '@/hooks/useRealtimeEvent'
 import type { Pair, Participant } from '@/lib/types'
 
 type Tab = 'my' | 'all'
@@ -28,6 +29,7 @@ export default function ResultsPage() {
   const [participantId, setParticipantId] = useState<string | null>(searchParams.get('p'))
 
   const isDesktop = useIsDesktop()
+  const event = useRealtimeEvent(id)
   const [pairs, setPairs] = useState<Pair[]>([])
   const [tab, setTab] = useState<Tab>(searchParams.get('p') ? 'my' : 'all')
   const [adminToken, setAdminToken] = useState<string | null>(null)
@@ -84,6 +86,12 @@ export default function ResultsPage() {
       })
     setAdminToken(localStorage.getItem(`admin_token_${id}`) || localStorage.getItem('master_token'))
   }, [id])
+
+  useEffect(() => {
+    if (event?.status === 'collecting' && !adminToken) {
+      router.push(`/events/${id}`)
+    }
+  }, [event?.status, adminToken, id, router])
 
   function handleRevealEnd() {
     sessionStorage.setItem(`seen_partner_${id}`, '1')

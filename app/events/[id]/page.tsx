@@ -110,6 +110,8 @@ export default function RegisterPage() {
   const [registered, setRegistered] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [myId, setMyId] = useState<string | null>(null)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const clubColors = useClubColors()
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -143,6 +145,21 @@ export default function RegisterPage() {
     setMyId(participant.id)
     setRegistered(true)
     setParticipants(prev => [...prev, participant])
+  }
+
+  async function handleCancel() {
+    if (!myId) return
+    setCancelling(true)
+    const res = await fetch(`/api/participants/${myId}`, { method: 'DELETE' })
+    setCancelling(false)
+    if (res.ok) {
+      localStorage.removeItem(PARTICIPANT_KEY)
+      localStorage.removeItem(registeredKey(id))
+      setRegistered(false)
+      setMyId(null)
+      setParticipants(prev => prev.filter(p => p.id !== myId))
+      setShowCancelConfirm(false)
+    }
   }
 
   function startPress() {
@@ -204,11 +221,38 @@ export default function RegisterPage() {
 
         {registered ? (
           <div style={{ textAlign: 'center' }}>
+            {showCancelConfirm && (
+              <div className="modal-overlay">
+                <div className="modal-panel" style={{ borderTop: '2px solid var(--accent-danger)' }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent-danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+                    ⚠ 등록 취소
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>등록을 취소할까요?</div>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 20 }}>
+                    취소 후 다시 등록할 수 있습니다.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setShowCancelConfirm(false)} disabled={cancelling} className="btn-ghost" style={{ flex: 1 }}>
+                      돌아가기
+                    </button>
+                    <button onClick={handleCancel} disabled={cancelling} className="btn-danger" style={{ flex: 1 }}>
+                      {cancelling ? '취소 중...' : '등록 취소'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div style={{ fontSize: 48, marginBottom: 12, color: 'var(--accent-success)' }}>✓</div>
             <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)', marginBottom: 8 }}>등록 완료!</div>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6, marginBottom: 16 }}>
               주최자가 배정을 시작하면<br />자동으로 결과가 표시됩니다.
             </p>
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              style={{ background: 'none', border: 'none', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              등록 취소
+            </button>
             <ParticipantList participants={participants} myId={myId} clubColors={clubColors} onRefresh={load} />
           </div>
         ) : (

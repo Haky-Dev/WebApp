@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import type { Participant, Club } from '@/lib/types'
 import RatingBadge from '@/components/ui/RatingBadge'
 import ClubBadge from '@/components/ui/ClubBadge'
@@ -34,6 +35,30 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
     fetch(`/api/participants?eventId=${eventId}`)
       .then(r => r.json())
       .then(setList)
+  }, [eventId])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`participants:${eventId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'participants', filter: `event_id=eq.${eventId}` },
+        (payload) => {
+          const p = payload.new as Participant
+          setList(l => l.some(x => x.id === p.id) ? l : [p, ...l])
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'participants' },
+        (payload) => {
+          const deletedId = (payload.old as { id: string }).id
+          setList(l => l.filter(x => x.id !== deletedId))
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [eventId])
 
   async function handleAdd(e: React.FormEvent) {

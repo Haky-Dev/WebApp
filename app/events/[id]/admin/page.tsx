@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { QRCodeSVG } from 'qrcode.react'
 import AdminPinModal from '@/components/admin/AdminPinModal'
 import AdminParticipantPanel from '@/components/admin/AdminParticipantPanel'
 import AssignmentPanel from '@/components/admin/AssignmentPanel'
@@ -33,6 +34,8 @@ export default function AdminPage() {
   const [eventName, setEventName] = useState<string>('')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [showQR, setShowQR] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const adminSaved = localStorage.getItem(`admin_token_${id}`)
@@ -207,25 +210,60 @@ export default function AdminPage() {
               {eventName || id.slice(0, 8) + '...'}
             </div>
           </div>
-          {token && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-              {eventStatus === 'closed' && (
-                <button
-                  onClick={() => setShowResetConfirm(true)}
-                  style={{ fontSize: 12, fontWeight: 800, color: 'var(--neon-cyan)', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  배정 초기화
-                </button>
-              )}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+            <button
+              onClick={() => setShowQR(v => !v)}
+              style={{ fontSize: 12, fontWeight: 800, color: showQR ? 'var(--neon-cyan)' : 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {showQR ? 'QR 닫기' : 'QR 보기'}
+            </button>
+            {token && eventStatus === 'closed' && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                style={{ fontSize: 12, fontWeight: 800, color: 'var(--neon-cyan)', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                배정 초기화
+              </button>
+            )}
+            {token && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-danger)', background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 토너먼트 삭제
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* QR 패널 */}
+        {showQR && (
+          <div style={{ background: 'var(--bg-surface)', border: '1.5px solid var(--neon-cyan)', borderRadius: 8, padding: 20, marginBottom: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase' }}>참가자 QR</div>
+            <QRCodeSVG
+              value={`${typeof window !== 'undefined' ? window.location.origin : ''}/events/${id}`}
+              size={200}
+              bgColor="transparent"
+              fgColor="var(--text-primary)"
+            />
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, wordBreak: 'break-all', textAlign: 'center' }}>
+              {typeof window !== 'undefined' ? `${window.location.origin}/events/${id}` : ''}
+            </div>
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/events/${id}`
+                navigator.clipboard.writeText(url).then(() => {
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                })
+              }}
+              className="btn-ghost"
+              style={{ width: '100%' }}
+            >
+              {copied ? '복사됨 ✓' : 'URL 복사'}
+            </button>
+          </div>
+        )}
 
         {/* 탭 (2개) */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
