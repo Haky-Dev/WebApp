@@ -180,7 +180,7 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                   clubColor={pair.participant_b?.club ? clubColors.get(pair.participant_b.club) : undefined}
                 />
               </div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textAlign: 'right', paddingRight: 2 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: color, textAlign: 'right', paddingRight: 2, textShadow: `0 0 8px ${color}66` }}>
                 합산 {combined}
               </div>
             </div>
