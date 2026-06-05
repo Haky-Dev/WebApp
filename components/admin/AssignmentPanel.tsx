@@ -12,6 +12,64 @@ interface Props {
   onReset: () => void
 }
 
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+function GroupSizePreview({ total, teamsPerGroup, excludeId, tempName, tempRating }: {
+  total: number
+  teamsPerGroup: number
+  excludeId: string
+  tempName: string
+  tempRating: string
+}) {
+  let n = total
+  if (n % 2 !== 0) {
+    if (excludeId) n -= 1
+    else if (tempName && tempRating && !isNaN(parseFloat(tempRating))) n += 1
+  }
+
+  if (n < 2 || n % 2 !== 0) {
+    return (
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, marginTop: 20 }}>
+          {total % 2 !== 0 ? '홀수 인원 — 조정 후 미리보기' : ''}
+        </p>
+      </div>
+    )
+  }
+
+  const groupSize = teamsPerGroup * 2
+  const fullGroups = Math.floor(n / groupSize)
+  const remainder = n % groupSize
+  const groups: { letter: string; teams: number }[] = []
+  let idx = 0
+  if (remainder > 0) groups.push({ letter: LETTERS[idx++], teams: remainder / 2 })
+  for (let g = 0; g < fullGroups; g++) groups.push({ letter: LETTERS[idx++], teams: teamsPerGroup })
+
+  return (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>
+        미리보기 · {groups.length}개 그룹
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {groups.map(({ letter, teams }) => (
+          <div key={letter} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 6,
+            padding: '6px 10px',
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--accent)' }}>그룹 {letter}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>
+              {teams}팀 · {teams * 2}명
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function AssignmentPanel({ token, eventId, eventStatus, onAssignStart, onGroupDrawStart, onReset }: Props) {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [algorithm, setAlgorithm] = useState<'snake' | 'group-draw'>('snake')
@@ -124,19 +182,22 @@ export default function AssignmentPanel({ token, eventId, eventStatus, onAssignS
           ))}
         </div>
         {algorithm === 'group-draw' && (
-          <div style={{ marginTop: 12, marginLeft: 24 }}>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>그룹당 팀수</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button
-                onClick={() => setTeamsPerGroup(v => Math.max(2, v - 1))}
-                style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
-              >−</button>
-              <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--accent)', minWidth: 32, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{teamsPerGroup}</span>
-              <button
-                onClick={() => setTeamsPerGroup(v => Math.min(20, v + 1))}
-                style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
-              >+</button>
+          <div style={{ marginTop: 12, marginLeft: 24, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ flexShrink: 0 }}>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 8 }}>그룹당 팀수</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  onClick={() => setTeamsPerGroup(v => Math.max(2, v - 1))}
+                  style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
+                >−</button>
+                <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--accent)', minWidth: 32, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{teamsPerGroup}</span>
+                <button
+                  onClick={() => setTeamsPerGroup(v => Math.min(20, v + 1))}
+                  style={{ width: 36, height: 36, borderRadius: 6, fontSize: 18, fontWeight: 900, cursor: 'pointer', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1.5px solid var(--border)' }}
+                >+</button>
+              </div>
             </div>
+            <GroupSizePreview total={participants.length} teamsPerGroup={teamsPerGroup} excludeId={excludeId} tempName={tempName} tempRating={tempRating} />
           </div>
         )}
       </div>

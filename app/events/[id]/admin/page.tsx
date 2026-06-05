@@ -20,6 +20,7 @@ export default function AdminPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
+  const [tokenChecked, setTokenChecked] = useState(false)
   const [isMaster, setIsMaster] = useState(false)
   const [tab, setTab] = useState<Tab>('participants')
   const [animationPairs, setAnimationPairs] = useState<{ a: Participant; b: Participant }[] | null>(null)
@@ -42,6 +43,7 @@ export default function AdminPage() {
       setToken(masterSaved)
       setIsMaster(true)
     }
+    setTokenChecked(true)
   }, [])
 
   useEffect(() => {
@@ -120,7 +122,7 @@ export default function AdminPage() {
   return (
     <main className="page-scanline" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
       <div style={{ maxWidth: 512, margin: '0 auto', padding: '24px' }}>
-        {!token && <AdminPinModal eventId={id} onSuccess={handleTokenSet} />}
+        {tokenChecked && !token && <AdminPinModal eventId={id} onSuccess={handleTokenSet} />}
 
         {/* 배정 초기화 확인 모달 */}
         {showResetConfirm && (
