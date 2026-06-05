@@ -25,12 +25,11 @@ export default function ResultsPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const participantId = searchParams.get('p') ||
-    (typeof window !== 'undefined' ? localStorage.getItem('my_participant_id') : null)
+  const [participantId, setParticipantId] = useState<string | null>(searchParams.get('p'))
 
   const isDesktop = useIsDesktop()
   const [pairs, setPairs] = useState<Pair[]>([])
-  const [tab, setTab] = useState<Tab>(participantId ? 'my' : 'all')
+  const [tab, setTab] = useState<Tab>(searchParams.get('p') ? 'my' : 'all')
   const [adminToken, setAdminToken] = useState<string | null>(null)
   const [resetting, setResetting] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -55,16 +54,23 @@ export default function ResultsPage() {
   }
 
   useEffect(() => {
+    const stored = localStorage.getItem('my_participant_id')
+    const effectiveId = searchParams.get('p') || stored
+    if (effectiveId && effectiveId !== participantId) {
+      setParticipantId(effectiveId)
+      setTab('my')
+    }
+
     fetch(`/api/pairs/${id}`)
       .then(r => r.json())
       .then((data: Pair[]) => {
         setPairs(data)
-        if (participantId && !sessionStorage.getItem(`seen_partner_${id}`)) {
+        if (effectiveId && !sessionStorage.getItem(`seen_partner_${id}`)) {
           const myPair = data.find(p =>
-            p.participant_a_id === participantId || p.participant_b_id === participantId
+            p.participant_a_id === effectiveId || p.participant_b_id === effectiveId
           )
           if (myPair) {
-            const partner = myPair.participant_a_id === participantId
+            const partner = myPair.participant_a_id === effectiveId
               ? myPair.participant_b!
               : myPair.participant_a!
             const names = data

@@ -15,10 +15,15 @@ interface Props {
 
 type Stage = 'grid' | 'draw' | 'finale'
 type Phase = 'idle' | 'spinning' | 'locked'
-type SpinVisualPhase = 'idle' | 'fast' | 'slow' | 'locking' | 'locked'
 
 const COLORS = ['#ff2d78', '#39ff14', '#00d4ff']
 const colorFor = (i: number) => COLORS[i % COLORS.length]
+
+const ITEM_H = 60
+const VISIBLE = 5
+const CENTER = Math.floor(VISIBLE / 2)
+const SPIN_BEFORE = 18
+const SPIN_DUR = 2200
 
 const bracket: React.CSSProperties = {
   position: 'absolute', width: 34, height: 34,
@@ -45,6 +50,8 @@ function Brackets() {
   )
 }
 
+const PLACEHOLDER_REEL = Array.from({ length: VISIBLE }, (_, i) => i === CENTER ? '?' : '')
+
 export default function GroupDrawCeremony({ groups, publishing, onPublish }: Props) {
   const isDesktop = useIsDesktop()
   const clubColors = useClubColors()
@@ -53,63 +60,94 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
   const [done, setDone] = useState<boolean[]>(() => groups.map(() => false))
   const [revealCount, setRevealCount] = useState(0)
   const [phase, setPhase] = useState<Phase>('idle')
-  const [spinVisualPhase, setSpinVisualPhase] = useState<SpinVisualPhase>('idle')
-  const [spinName, setSpinName] = useState('???')
-  const spinTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [reelItems, setReelItems] = useState<string[]>(PLACEHOLDER_REEL)
+  const [spinTrigger, setSpinTrigger] = useState<{ teamIdx: number } | null>(null)
+  const reelRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const groupsRef = useRef(groups)
 
-  useEffect(() => () => { if (spinTimer.current) clearTimeout(spinTimer.current) }, [])
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
   const group = groups[groupIdx]
   const allDone = done.every(Boolean)
+
+  function buildReel(targetName: string, candidates: string[]): string[] {
+    const pool = candidates.length > 1 ? [...candidates] : [targetName, targetName, targetName]
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]]
+    }
+    const before = Array.from({ length: SPIN_BEFORE }, (_, i) => pool[i % pool.length])
+    const after = Array.from({ length: 2 }, () => pool[Math.floor(Math.random() * pool.length)])
+    return [...before, targetName, ...after]
+  }
+
+  function translateY(tIdx: number) {
+    return -(tIdx - CENTER) * ITEM_H
+  }
 
   function openGroup(idx: number) {
     setGroupIdx(idx)
     setRevealCount(0)
     setPhase('idle')
-    setSpinVisualPhase('idle')
-    setSpinName('???')
+    setReelItems(PLACEHOLDER_REEL)
+    setSpinTrigger(null)
     setStage('draw')
   }
 
   function startSpin() {
     if (phase !== 'idle') return
-    const g = groups[groupIdx]
+    const g = groupsRef.current[groupIdx]
     const team = g.teams[revealCount]
     if (!team) return
-    setPhase('spinning')
-    setSpinVisualPhase('fast')
+
     const candidates = g.teams.map(t => t.b.name)
-    let speed = 80
-    let elapsed = 0
-    const total = 1000
-    const tick = () => {
-      setSpinName(candidates[Math.floor(Math.random() * candidates.length)])
-      elapsed += speed
-      speed = Math.min(speed * 1.08, 600)
-      setSpinVisualPhase(speed < 250 ? 'fast' : 'slow')
-      if (elapsed < total) {
-        spinTimer.current = setTimeout(tick, speed)
-      } else {
-        setSpinName(team.b.name)
-        setSpinVisualPhase('locking')
-        setRevealCount(revealCount + 1)
-        setPhase('locked')
-        setTimeout(() => setSpinVisualPhase('locked'), 300)
-        confetti({ particleCount: 40, spread: 55, origin: { y: 0.55 }, colors: COLORS })
-      }
-    }
-    tick()
+    const items = buildReel(team.b.name, candidates)
+    setPhase('spinning')
+    setReelItems(items)
+    setSpinTrigger({ teamIdx: revealCount })
   }
+
+  // Fires after reelItems renders
+  useEffect(() => {
+    if (!spinTrigger) return
+    const el = reelRef.current
+    if (!el) return
+
+    const { teamIdx } = spinTrigger
+    setSpinTrigger(null)
+
+    el.style.transition = 'none'
+    el.style.transform = 'translateY(0px)'
+    el.getBoundingClientRect()
+
+    el.style.transition = `transform ${SPIN_DUR}ms cubic-bezier(0.15, 0, 0.05, 1)`
+    el.style.transform = `translateY(${translateY(SPIN_BEFORE)}px)`
+
+    timerRef.current = setTimeout(() => {
+      setPhase('locked')
+      setRevealCount(teamIdx + 1)
+      confetti({ particleCount: 40, spread: 55, origin: { y: 0.55 }, colors: COLORS })
+    }, SPIN_DUR + 100)
+  }, [spinTrigger])
 
   function proceed() {
     if (phase !== 'locked') return
     const g = groups[groupIdx]
+
+    // Reset reel to placeholder
+    const el = reelRef.current
+    if (el) {
+      el.style.transition = 'none'
+      el.style.transform = 'translateY(0px)'
+    }
+
     if (revealCount < g.teams.length) {
       setPhase('idle')
-      setSpinVisualPhase('idle')
-      setSpinName('???')
+      setReelItems(PLACEHOLDER_REEL)
       return
     }
+
     const nextDone = done.map((d, i) => (i === groupIdx ? true : d))
     setDone(nextDone)
     if (nextDone.every(Boolean)) {
@@ -172,73 +210,169 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
     const activeIdx = phase === 'locked' ? revealCount - 1 : revealCount
     const activeTeam = group.teams[Math.min(activeIdx, group.teams.length - 1)]
     const teamNo = Math.min(activeIdx + 1, group.teams.length)
+    const revealedTeams = group.teams.slice(0, phase === 'locked' ? revealCount : revealCount)
+    const hasCards = revealedTeams.length > 0
+    const REEL_H = ITEM_H * VISIBLE
+    const groupColor = colorFor(groupIdx)
+    const BOTTOM_H = isDesktop ? 200 : 145
+
     return (
-      <div style={stageBox}>
+      <div style={{ ...stageBox, justifyContent: undefined }}>
         <Scan /><Brackets />
-        <div style={{ position: 'absolute', top: 26, fontSize: 13, letterSpacing: 4, fontWeight: 800, color: colorFor(groupIdx), textShadow: `0 0 10px ${colorFor(groupIdx)}`, textTransform: 'uppercase' }}>
+        <div style={{ position: 'absolute', top: 26, fontSize: 13, letterSpacing: 4, fontWeight: 800, color: groupColor, textShadow: `0 0 10px ${groupColor}`, textTransform: 'uppercase' }}>
           GROUP {group.letter} · 팀 {teamNo} / {group.teams.length}
         </div>
-        <div style={{ textAlign: 'center' }}>
-          {/* 팀A */}
-          <div style={{ fontSize: 'clamp(30px,6.5vw,86px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
+
+        {/* 상단 스페이서 */}
+        <div style={{ height: BOTTOM_H, flexShrink: 0 }} />
+
+        {/* 슬롯 머신 영역: flex:1 */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '0 24px',
+          maxWidth: isDesktop ? 560 : 400,
+          width: '100%',
+        }}>
+          {/* 퍼스트 */}
+          <div style={{ fontSize: 'clamp(30px,6.5vw,80px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
             {activeTeam?.a.name}
           </div>
-          <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginTop: 6, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
             {activeTeam?.a.club && (
-              <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={14} fontWeight={700} /><span>·</span></>
+              <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={13} fontWeight={700} /><span>·</span></>
             )}
-            {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={14} />}
+            {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={13} />}
           </div>
 
-          <div style={{ fontSize: 26, color: '#3a3a3a', fontWeight: 700, margin: '14px 0' }}>+</div>
+          <div style={{ fontSize: 18, color: '#2a2a2a', fontWeight: 700, marginBottom: 16 }}>+</div>
 
-          {/* 스핀 이름 */}
+          {/* Slot machine reel */}
           <div style={{
-            fontSize: 'clamp(34px,7.2vw,98px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1,
-            color: spinVisualPhase === 'locked' || spinVisualPhase === 'locking' ? '#39ff14' : '#555',
-            textShadow: spinVisualPhase === 'locked' || spinVisualPhase === 'locking'
-              ? '0 0 22px #39ff14, 0 0 60px rgba(57,255,20,.45)'
-              : 'none',
-            filter: spinVisualPhase === 'fast' ? 'blur(2px)' : 'blur(0)',
-            opacity: spinVisualPhase === 'fast' ? 0.7 : 1,
-            animation: spinVisualPhase === 'locking' ? 'spinBounce 0.3s ease both' : 'none',
-            transition: 'color .2s, text-shadow .2s, filter 0.15s, opacity 0.15s',
-            minHeight: '1.1em',
+            position: 'relative',
+            width: '100%',
+            maxWidth: 280,
+            margin: '0 auto',
+            height: REEL_H,
+            overflow: 'hidden',
+            borderRadius: 14,
+            background: 'rgba(0,0,0,0.6)',
+            border: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#111'}`,
+            boxShadow: phase === 'locked'
+              ? `0 0 32px ${groupColor}30, inset 0 0 20px ${groupColor}08`
+              : '0 0 20px rgba(0,0,0,0.8)',
+            transition: 'border-color 0.4s, box-shadow 0.4s',
           }}>
-            {phase === 'idle' ? '???' : spinName}
+            {/* Center focus */}
+            <div style={{
+              position: 'absolute',
+              top: ITEM_H * CENTER,
+              left: 0, right: 0,
+              height: ITEM_H,
+              background: phase === 'locked' ? `${groupColor}0a` : 'rgba(255,255,255,0.02)',
+              borderTop: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
+              borderBottom: `1px solid ${phase === 'locked' ? `${groupColor}55` : '#1a1a1a'}`,
+              zIndex: 2, pointerEvents: 'none',
+              transition: 'background 0.4s, border-color 0.4s',
+            }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to bottom, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: ITEM_H * 1.8, background: 'linear-gradient(to top, #010101, transparent)', zIndex: 3, pointerEvents: 'none' }} />
+
+            <div ref={reelRef}>
+              {reelItems.map((name, i) => (
+                <div key={i} style={{
+                  height: ITEM_H,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 'clamp(20px, 3vw, 28px)',
+                  fontWeight: 900,
+                  color: phase === 'locked' && i === SPIN_BEFORE
+                    ? groupColor
+                    : name === '?' ? '#2a2a2a' : '#e2e8f0',
+                  textShadow: phase === 'locked' && i === SPIN_BEFORE
+                    ? `0 0 20px ${groupColor}, 0 0 40px ${groupColor}66`
+                    : 'none',
+                  animation: phase === 'locked' && i === SPIN_BEFORE ? 'spinBounce 0.3s ease both' : 'none',
+                  transition: 'color 0.3s, text-shadow 0.3s',
+                  userSelect: 'none',
+                  letterSpacing: '-0.5px',
+                }}>
+                  {name}
+                </div>
+              ))}
+            </div>
           </div>
-          {(spinVisualPhase === 'locked' || spinVisualPhase === 'locking') && activeTeam && (
-            <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+
+          {/* Locked: B player info */}
+          {phase === 'locked' && activeTeam && (
+            <div style={{
+              fontSize: 13, color: '#555', fontWeight: 700,
+              marginTop: 8,
+              display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap',
+              animation: 'slideUp 0.3s ease both',
+            }}>
               {activeTeam.b.club && (
-                <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={14} fontWeight={700} /><span>·</span></>
+                <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={13} fontWeight={700} /><span>·</span></>
               )}
-              <RatingBadge rating={activeTeam.b.rating} fontSize={14} />
+              <RatingBadge rating={activeTeam.b.rating} fontSize={13} />
             </div>
           )}
         </div>
+        </div>{/* 슬롯 머신 영역 끝 */}
 
-        {revealCount > 0 && (
-          <div style={{ position: 'absolute', bottom: 30, left: 34, fontSize: 11, color: '#3f3f3f', fontWeight: 700, lineHeight: 1.7, textAlign: 'left' }}>
-            {group.teams.slice(0, revealCount).map(t => (
-              <div key={t.label}>{t.label} · {t.a.club && <><ClubBadge name={t.a.club} color={clubColors.get(t.a.club)} fontSize={11} fontWeight={700} />{' '}</>}{t.a.name} (<RatingBadge rating={t.a.rating} fontSize={11} />) + {t.b.club && <><ClubBadge name={t.b.club} color={clubColors.get(t.b.club)} fontSize={11} fontWeight={700} />{' '}</>}{t.b.name} (<RatingBadge rating={t.b.rating} fontSize={11} />)</div>
-            ))}
-          </div>
-        )}
+        {/* 하단 영역: 항상 BOTTOM_H 높이 유지 → 레이아웃 이동 없음 */}
+        <div style={{
+          height: BOTTOM_H,
+          flexShrink: 0,
+          width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: 10,
+          padding: '0 20px 24px',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)',
+          zIndex: 10,
+        }}>
+          {hasCards && (
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', width: '100%', scrollbarWidth: 'none', justifyContent: 'center' }}>
+              {revealedTeams.map((t, i) => {
+                const combined = ((t.a.rating ?? 0) + (t.b.rating ?? 0)).toFixed(2)
+                return (
+                  <div key={t.label} style={{
+                    flexShrink: 0,
+                    background: `linear-gradient(135deg, rgba(10,10,10,0.95), ${groupColor}15)`,
+                    border: `1px solid ${groupColor}25`,
+                    borderRadius: 10,
+                    padding: isDesktop ? '18px 26px' : '10px 14px',
+                    minWidth: isDesktop ? 320 : 170,
+                    animation: 'slideUp 0.4s ease both',
+                  }}>
+                    <div style={{ fontSize: isDesktop ? 14 : 11, fontWeight: 800, color: groupColor, letterSpacing: '2px', marginBottom: isDesktop ? 8 : 4 }}>
+                      {t.label}
+                    </div>
+                    <div style={{ fontSize: isDesktop ? 30 : 16, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-1px' }}>
+                      {t.a.name} <span style={{ color: '#333', margin: isDesktop ? '0 6px' : '0 3px', fontWeight: 700 }}>×</span> {t.b.name}
+                    </div>
+                    <div style={{ fontSize: isDesktop ? 13 : 10, color: '#444', marginTop: isDesktop ? 6 : 3 }}>합산 {combined}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
-        <button
-          onClick={phase === 'idle' ? startSpin : phase === 'locked' ? proceed : undefined}
-          disabled={phase === 'spinning'}
-          className="btn-cta"
-          style={{ position: 'absolute', bottom: 34, maxWidth: 320 }}
-        >
-          {phase === 'spinning'
-            ? 'DRAWING...'
-            : phase === 'idle'
-              ? '▸ 팀 추첨'
-              : revealCount < group.teams.length
-                ? '다음 팀 →'
-                : '그룹 완료 ✓'}
-        </button>
+          <button
+            onClick={phase === 'idle' ? startSpin : phase === 'locked' ? proceed : undefined}
+            disabled={phase === 'spinning'}
+            className="btn-cta"
+            style={{ maxWidth: 320, width: '100%' }}
+          >
+            {phase === 'spinning'
+              ? 'DRAWING...'
+              : phase === 'idle'
+                ? '▸ 팀 추첨'
+                : revealCount < group.teams.length
+                  ? '다음 팀 →'
+                  : '그룹 완료 ✓'}
+          </button>
+        </div>
       </div>
     )
   }
