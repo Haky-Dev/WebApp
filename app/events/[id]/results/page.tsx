@@ -168,6 +168,12 @@ export default function ResultsPage() {
             >
               ← 홈
             </button>
+            <button
+              onClick={() => router.push(`/events/${id}/notice`)}
+              style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+            >
+              📋 공지 보기
+            </button>
             <div style={{ fontSize: 11, letterSpacing: '2px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>
               배정 결과
             </div>

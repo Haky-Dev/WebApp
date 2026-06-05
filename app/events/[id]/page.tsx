@@ -185,6 +185,12 @@ export default function RegisterPage() {
           >
             ← 홈
           </button>
+          <button
+            onClick={() => router.push(`/events/${id}/notice`)}
+            style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+          >
+            📋 공지 보기
+          </button>
           <div style={{ textAlign: 'center' }}>
             <LogoType />
             <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary)', margin: '12px 0 8px', letterSpacing: '-0.5px' }}>{event.name}</div>
@@ -206,6 +212,12 @@ export default function RegisterPage() {
           style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
         >
           ← 홈
+        </button>
+        <button
+          onClick={() => router.push(`/events/${id}/notice`)}
+          style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+        >
+          📋 공지 보기
         </button>
         <div
           style={{ textAlign: 'center', marginBottom: 30, cursor: 'pointer', userSelect: 'none' }}

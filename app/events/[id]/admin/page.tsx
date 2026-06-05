@@ -203,6 +203,12 @@ export default function AdminPage() {
             >
               ← 홈
             </button>
+            <button
+              onClick={() => router.push(`/events/${id}/notice`)}
+              style={{ background: 'none', border: 'none', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginBottom: 8, display: 'block' }}
+            >
+              📋 공지 보기
+            </button>
             <div style={{ fontSize: 11, fontWeight: 800, color: isMaster ? 'var(--neon-cyan)' : 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 5 }}>
               {isMaster ? '⚡ 마스터 모드' : '🔒 주최자 모드'}
             </div>
