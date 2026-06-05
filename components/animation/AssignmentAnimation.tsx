@@ -4,6 +4,8 @@ import confetti from 'canvas-confetti'
 import type { Participant } from '@/lib/types'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
 import RatingBadge from '@/components/ui/RatingBadge'
+import { useClubColors } from '@/hooks/useClubColors'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props {
   pairs: { a: Participant; b: Participant }[]
@@ -25,6 +27,7 @@ function teamColorRgba(i: number) { return TEAM_COLORS_RGBA[i % TEAM_COLORS_RGBA
 
 export default function AssignmentAnimation({ pairs, onEnd }: Props) {
   const isDesktop = useIsDesktop()
+  const clubColors = useClubColors()
   const [phase, setPhase] = useState<Phase>('drumroll')
   const [currentTeam, setCurrentTeam] = useState(0)
   const [spinPhase, setSpinPhase] = useState<SpinPhase>('idle')
@@ -104,8 +107,10 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
             <div style={{ fontSize: 'clamp(30px, 4vw, 64px)', fontWeight: 900, color: '#f1f5f9', textShadow: '0 0 20px rgba(255,255,255,0.2)', marginBottom: 4 }}>
               {pairs[currentTeam]?.a.name}
             </div>
-            <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginBottom: 4 }}>
-              {pairs[currentTeam]?.a.club ? `${pairs[currentTeam].a.club} · ` : ''}
+            <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {pairs[currentTeam]?.a.club && (
+                <><ClubBadge name={pairs[currentTeam].a.club!} color={clubColors.get(pairs[currentTeam].a.club!)} fontSize={13} fontWeight={700} /><span>·</span></>
+              )}
               {pairs[currentTeam] && <RatingBadge rating={pairs[currentTeam].a.rating} fontSize={13} />}
             </div>
 
@@ -125,8 +130,10 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
               {spinName}
             </div>
             {spinPhase === 'locked' && pairs[currentTeam] && (
-              <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginTop: 4 }}>
-                {pairs[currentTeam].b.club ? `${pairs[currentTeam].b.club} · ` : ''}
+              <div style={{ fontSize: 13, color: '#555', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {pairs[currentTeam].b.club && (
+                  <><ClubBadge name={pairs[currentTeam].b.club!} color={clubColors.get(pairs[currentTeam].b.club!)} fontSize={13} fontWeight={700} /><span>·</span></>
+                )}
                 <RatingBadge rating={pairs[currentTeam].b.rating} fontSize={13} />
               </div>
             )}
@@ -136,7 +143,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
               <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #111' }}>
                 {revealedPairs.map((p, i) => (
                   <div key={i} style={{ fontSize: 12, color: '#444', fontWeight: 700, marginBottom: 4 }}>
-                    팀{i + 1}: {p.a.club ? `${p.a.club} ` : ''}{p.a.name} (<RatingBadge rating={p.a.rating} fontSize={11} />) × {p.b.club ? `${p.b.club} ` : ''}{p.b.name} (<RatingBadge rating={p.b.rating} fontSize={11} />)
+                    팀{i + 1}: {p.a.club && <><ClubBadge name={p.a.club} color={clubColors.get(p.a.club)} fontSize={11} fontWeight={700} />{' '}</>}{p.a.name} (<RatingBadge rating={p.a.rating} fontSize={11} />) × {p.b.club && <><ClubBadge name={p.b.club} color={clubColors.get(p.b.club)} fontSize={11} fontWeight={700} />{' '}</>}{p.b.name} (<RatingBadge rating={p.b.rating} fontSize={11} />)
                   </div>
                 ))}
               </div>
@@ -180,7 +187,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ flex: 1 }}>
-                        {p.a.club && <div style={{ fontSize: 11, color: '#555', fontWeight: 400 }}>{p.a.club}</div>}
+                        {p.a.club && <ClubBadge name={p.a.club} color={clubColors.get(p.a.club)} fontSize={11} />}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
                           <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.a.name}</span>
                           <RatingBadge rating={p.a.rating} fontSize={12} />
@@ -188,7 +195,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                       </div>
                       <span style={{ color: '#444', fontWeight: 700, flexShrink: 0 }}>×</span>
                       <div style={{ flex: 1 }}>
-                        {p.b.club && <div style={{ fontSize: 11, color: '#555', fontWeight: 400 }}>{p.b.club}</div>}
+                        {p.b.club && <ClubBadge name={p.b.club} color={clubColors.get(p.b.club)} fontSize={11} />}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
                           <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.b.name}</span>
                           <RatingBadge rating={p.b.rating} fontSize={12} />

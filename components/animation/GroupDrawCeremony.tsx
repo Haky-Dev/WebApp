@@ -4,6 +4,8 @@ import confetti from 'canvas-confetti'
 import type { DrawnGroup } from '@/lib/algorithms/group-draw'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
 import RatingBadge from '@/components/ui/RatingBadge'
+import { useClubColors } from '@/hooks/useClubColors'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props {
   groups: DrawnGroup[]
@@ -45,6 +47,7 @@ function Brackets() {
 
 export default function GroupDrawCeremony({ groups, publishing, onPublish }: Props) {
   const isDesktop = useIsDesktop()
+  const clubColors = useClubColors()
   const [stage, setStage] = useState<Stage>('grid')
   const [groupIdx, setGroupIdx] = useState(0)
   const [done, setDone] = useState<boolean[]>(() => groups.map(() => false))
@@ -180,8 +183,10 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
           <div style={{ fontSize: 'clamp(30px,6.5vw,86px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
             {activeTeam?.a.name}
           </div>
-          <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6 }}>
-            {activeTeam?.a.club ? `${activeTeam.a.club} · ` : ''}
+          <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {activeTeam?.a.club && (
+              <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={14} fontWeight={700} /><span>·</span></>
+            )}
             {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={14} />}
           </div>
 
@@ -203,8 +208,10 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
             {phase === 'idle' ? '???' : spinName}
           </div>
           {(spinVisualPhase === 'locked' || spinVisualPhase === 'locking') && activeTeam && (
-            <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6 }}>
-              {activeTeam.b.club ? `${activeTeam.b.club} · ` : ''}
+            <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {activeTeam.b.club && (
+                <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={14} fontWeight={700} /><span>·</span></>
+              )}
               <RatingBadge rating={activeTeam.b.rating} fontSize={14} />
             </div>
           )}
@@ -213,7 +220,7 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
         {revealCount > 0 && (
           <div style={{ position: 'absolute', bottom: 30, left: 34, fontSize: 11, color: '#3f3f3f', fontWeight: 700, lineHeight: 1.7, textAlign: 'left' }}>
             {group.teams.slice(0, revealCount).map(t => (
-              <div key={t.label}>{t.label} · {t.a.name} (<RatingBadge rating={t.a.rating} fontSize={11} />) + {t.b.name} (<RatingBadge rating={t.b.rating} fontSize={11} />)</div>
+              <div key={t.label}>{t.label} · {t.a.club && <><ClubBadge name={t.a.club} color={clubColors.get(t.a.club)} fontSize={11} fontWeight={700} />{' '}</>}{t.a.name} (<RatingBadge rating={t.a.rating} fontSize={11} />) + {t.b.club && <><ClubBadge name={t.b.club} color={clubColors.get(t.b.club)} fontSize={11} fontWeight={700} />{' '}</>}{t.b.name} (<RatingBadge rating={t.b.rating} fontSize={11} />)</div>
             ))}
           </div>
         )}
@@ -255,14 +262,14 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
                 <div style={{ fontSize: 10, fontWeight: 700, color: '#555' }}>{combined}</div>
               </div>
               <div style={{ marginBottom: 2 }}>
-                {t.a.club && <div style={{ fontSize: 10, color: '#555', fontWeight: 400 }}>{t.a.club}</div>}
+                {t.a.club && <ClubBadge name={t.a.club} color={clubColors.get(t.a.club)} fontSize={10} />}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.a.name}</span>
                   <RatingBadge rating={t.a.rating} fontSize={11} />
                 </div>
               </div>
               <div>
-                {t.b.club && <div style={{ fontSize: 10, color: '#555', fontWeight: 400 }}>{t.b.club}</div>}
+                {t.b.club && <ClubBadge name={t.b.club} color={clubColors.get(t.b.club)} fontSize={10} />}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.b.name}</span>
                   <RatingBadge rating={t.b.rating} fontSize={11} />
