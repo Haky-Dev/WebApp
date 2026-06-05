@@ -16,7 +16,7 @@ export default function RatingBadge({ rating, fontSize = 12, fontWeight = 700 }:
       fontVariantNumeric: 'tabular-nums',
       whiteSpace: 'nowrap',
     }}>
-      {getRatingPrefix(rating)} {rating}
+      {getRatingPrefix(rating)}{rating}
     </span>
   )
 }
