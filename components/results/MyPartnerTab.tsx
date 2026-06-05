@@ -1,4 +1,5 @@
 import type { Pair } from '@/lib/types'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props {
   pairs: Pair[]
@@ -45,7 +46,7 @@ export default function MyPartnerTab({ pairs, participantId }: Props) {
           {partner.name}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700 }}>
-          {partner.club ? `${partner.club} · ` : ''}레이팅 {partner.rating}
+          {partner.club ? `${partner.club} · ` : ''}레이팅 <RatingBadge rating={partner.rating} fontSize={12} />
         </div>
       </div>
     </div>

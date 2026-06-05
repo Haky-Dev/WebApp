@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import type { Pair } from '@/lib/types'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props { pairs: Pair[]; highlightId?: string | null }
 
@@ -28,9 +29,7 @@ function ParticipantInfo({
         <span style={{ fontSize: isDesktop ? 20 : 15, fontWeight: 800, color: 'var(--text-primary)' }}>
           {name}
         </span>
-        <span style={{ fontSize: isDesktop ? 14 : 11, fontWeight: 700, color: 'var(--text-muted)' }}>
-          {rating}
-        </span>
+        <RatingBadge rating={rating} fontSize={isDesktop ? 14 : 11} />
       </div>
     </div>
   )

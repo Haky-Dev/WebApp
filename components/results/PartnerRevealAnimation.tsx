@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import type { Participant } from '@/lib/types'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props {
   partner: Participant
@@ -84,7 +85,7 @@ export default function PartnerRevealAnimation({ partner, allNames, onEnd }: Pro
         {!spinning && (
           <div style={{ marginBottom: 40, animation: 'fadeIn 0.4s ease both' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#555' }}>
-              {partner.club ? `${partner.club} · ` : ''}레이팅 {partner.rating}
+              {partner.club ? `${partner.club} · ` : ''}레이팅 <RatingBadge rating={partner.rating} fontSize={13} />
             </div>
           </div>
         )}
