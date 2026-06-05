@@ -8,18 +8,21 @@ export default function CopyButton({ pairs }: Props) {
   const [copied, setCopied] = useState(false)
 
   function handleCopy() {
-    const header = '팀\t파트너A 이름\t파트너A 동호회\t파트너A 레이팅\t파트너B 이름\t파트너B 동호회\t파트너B 레이팅'
-    const rows = pairs.map(p =>
-      [
+    const header = '팀\t파트너A 이름\t파트너A 동호회\t파트너A 레이팅\t파트너B 이름\t파트너B 동호회\t파트너B 레이팅\t합산 레이팅'
+    const rows = pairs.map(p => {
+      const ratingA = p.participant_a?.rating ?? 0
+      const ratingB = p.participant_b?.rating ?? 0
+      return [
         p.group_label ?? p.team_number,
         p.participant_a?.name ?? '',
         p.participant_a?.club ?? '',
-        p.participant_a?.rating.toFixed(2) ?? '',
+        ratingA.toFixed(2),
         p.participant_b?.name ?? '',
         p.participant_b?.club ?? '',
-        p.participant_b?.rating.toFixed(2) ?? '',
+        ratingB.toFixed(2),
+        (ratingA + ratingB).toFixed(2),
       ].join('\t')
-    )
+    })
     navigator.clipboard.writeText([header, ...rows].join('\n'))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
