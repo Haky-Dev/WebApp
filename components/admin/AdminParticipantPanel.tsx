@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { Participant, Club } from '@/lib/types'
 import RatingBadge from '@/components/ui/RatingBadge'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props { token: string; eventId: string }
 
@@ -22,6 +23,7 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
   useEffect(() => {
     fetch('/api/clubs').then(r => r.json()).then(setClubs)
   }, [eventId])
+  const clubColorMap = new Map(clubs.filter(c => c.color).map(c => [c.name, c.color!]))
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -265,9 +267,10 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
                 }}
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>
-                    {p.club || '—'}
-                  </span>
+                  {p.club
+                    ? <ClubBadge name={p.club} color={clubColorMap.get(p.club)} fontSize={10} />
+                    : <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>—</span>
+                  }
                   <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
                     {p.name}
                   </span>

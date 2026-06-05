@@ -5,6 +5,8 @@ import RegistrationForm from '@/components/registration/RegistrationForm'
 import { useRealtimeEvent } from '@/hooks/useRealtimeEvent'
 import type { Participant } from '@/lib/types'
 import RatingBadge from '@/components/ui/RatingBadge'
+import ClubBadge from '@/components/ui/ClubBadge'
+import { useClubColors } from '@/hooks/useClubColors'
 
 const PARTICIPANT_KEY = 'my_participant_id'
 const registeredKey = (eventId: string) => `registered_event_${eventId}`
@@ -31,7 +33,7 @@ function sortParticipants(participants: Participant[]): Participant[] {
   })
 }
 
-function ParticipantCard({ p, myId }: { p: Participant; myId: string | null }) {
+function ParticipantCard({ p, myId, clubColors }: { p: Participant; myId: string | null; clubColors: Map<string, string> }) {
   const isMe = !!myId && p.id === myId
   return (
     <div style={{
@@ -45,9 +47,10 @@ function ParticipantCard({ p, myId }: { p: Participant; myId: string | null }) {
       boxShadow: isMe ? '0 0 10px rgba(57,255,20,0.07) inset' : 'none',
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>
-          {p.club || '—'}
-        </span>
+        {p.club
+          ? <ClubBadge name={p.club} color={clubColors.get(p.club)} fontSize={10} />
+          : <span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>—</span>
+        }
         <span style={{
           fontSize: 13, fontWeight: 800,
           color: isMe ? '#39ff14' : 'var(--text-primary)',
@@ -61,9 +64,10 @@ function ParticipantCard({ p, myId }: { p: Participant; myId: string | null }) {
   )
 }
 
-function ParticipantList({ participants, myId, onRefresh }: {
+function ParticipantList({ participants, myId, clubColors, onRefresh }: {
   participants: Participant[]
   myId: string | null
+  clubColors: Map<string, string>
   onRefresh: () => void
 }) {
   const sorted = sortParticipants(participants)
@@ -92,7 +96,7 @@ function ParticipantList({ participants, myId, onRefresh }: {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {sorted.map(p => (
-          <ParticipantCard key={p.id} p={p} myId={myId} />
+          <ParticipantCard key={p.id} p={p} myId={myId} clubColors={clubColors} />
         ))}
       </div>
     </div>
@@ -106,6 +110,7 @@ export default function RegisterPage() {
   const [registered, setRegistered] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [myId, setMyId] = useState<string | null>(null)
+  const clubColors = useClubColors()
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const load = useCallback(async () => {
@@ -204,12 +209,12 @@ export default function RegisterPage() {
             <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, lineHeight: 1.6 }}>
               주최자가 배정을 시작하면<br />자동으로 결과가 표시됩니다.
             </p>
-            <ParticipantList participants={participants} myId={myId} onRefresh={load} />
+            <ParticipantList participants={participants} myId={myId} clubColors={clubColors} onRefresh={load} />
           </div>
         ) : (
           <>
             <RegistrationForm eventId={id} onSuccess={handleSuccess} />
-            <ParticipantList participants={participants} myId={myId} onRefresh={load} />
+            <ParticipantList participants={participants} myId={myId} clubColors={clubColors} onRefresh={load} />
           </>
         )}
       </div>

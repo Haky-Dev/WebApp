@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminPinModal from '@/components/admin/AdminPinModal'
+import ClubBadge from '@/components/ui/ClubBadge'
 import type { TournamentEvent, Club } from '@/lib/types'
 
 function LogoType() {
@@ -96,6 +97,12 @@ export default function HomePage() {
     router.push(`/events/${event.id}`)
   }
 
+  function handleMasterLogout() {
+    localStorage.removeItem('master_token')
+    setMasterToken(null)
+    setIsMasterAdmin(false)
+  }
+
   async function handleMasterPinSubmit(e: React.FormEvent) {
     e.preventDefault()
     setMasterPinError('')
@@ -141,6 +148,19 @@ export default function HomePage() {
       headers: { Authorization: `Bearer ${masterToken}` },
     })
     if (res.ok) setClubs(c => c.filter(cl => cl.id !== id))
+  }
+
+  async function handleUpdateClubColor(id: string, color: string | null) {
+    if (!masterToken) return
+    const res = await fetch(`/api/clubs/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${masterToken}` },
+      body: JSON.stringify({ color }),
+    })
+    if (res.ok) {
+      const updated: Club = await res.json()
+      setClubs(c => c.map(club => club.id === id ? updated : club))
+    }
   }
 
   function startPress() {
@@ -282,8 +302,16 @@ export default function HomePage() {
         {/* 마스터 어드민 패널 */}
         {isMasterAdmin && (
           <div style={{ marginBottom: 28, padding: 20, background: 'var(--bg-surface)', border: '1.5px solid var(--accent)', borderRadius: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent)', letterSpacing: '2px', marginBottom: 16, textTransform: 'uppercase' }}>
-              🔑 마스터 어드민
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent)', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                🔑 마스터 어드민
+              </div>
+              <button
+                onClick={handleMasterLogout}
+                style={{ background: 'none', border: 'none', fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
+              >
+                로그아웃
+              </button>
             </div>
 
             {/* 동호회 관리 */}
@@ -305,11 +333,29 @@ export default function HomePage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                 {clubs.map(c => (
                   <div key={c.id} className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{c.name}</span>
-                    <button
-                      onClick={() => handleDeleteClub(c.id)}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}
-                    >×</button>
+                    <ClubBadge name={c.name} color={c.color} fontSize={13} fontWeight={700} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <input
+                        type="color"
+                        value={c.color ?? '#888888'}
+                        onChange={e => handleUpdateClubColor(c.id, e.target.value)}
+                        title="동호회 색상"
+                        style={{ width: 28, height: 28, padding: 2, border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', background: 'none' }}
+                      />
+                      {c.color && (
+                        <button
+                          onClick={() => handleUpdateClubColor(c.id, null)}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', lineHeight: 1 }}
+                          title="색상 제거"
+                        >
+                          ↺
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteClub(c.id)}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}
+                      >×</button>
+                    </div>
                   </div>
                 ))}
                 {clubs.length === 0 && (
