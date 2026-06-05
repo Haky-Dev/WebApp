@@ -15,7 +15,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   if (!participant) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const status = (participant.events as { status: string } | null)?.status
+  const eventsArr = participant.events as { status: string }[] | null
+  const status = eventsArr?.[0]?.status
   if (status !== 'collecting') {
     return NextResponse.json({ error: 'Registration is closed' }, { status: 409 })
   }
