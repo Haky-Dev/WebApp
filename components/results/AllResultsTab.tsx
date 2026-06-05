@@ -3,6 +3,8 @@ import { useState } from 'react'
 import type { Pair } from '@/lib/types'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
 import RatingBadge from '@/components/ui/RatingBadge'
+import { useClubColors } from '@/hooks/useClubColors'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props { pairs: Pair[]; highlightId?: string | null }
 
@@ -16,15 +18,11 @@ function combinedRating(pair: Pair): number {
 }
 
 function ParticipantInfo({
-  name, club, rating, isDesktop,
-}: { name: string; club: string | null; rating: number; isDesktop: boolean }) {
+  name, club, rating, isDesktop, clubColor,
+}: { name: string; club: string | null; rating: number; isDesktop: boolean; clubColor?: string }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {club && (
-        <span style={{ fontSize: isDesktop ? 12 : 10, fontWeight: 400, color: 'var(--text-muted)' }}>
-          {club}
-        </span>
-      )}
+      {club && <ClubBadge name={club} color={clubColor} fontSize={isDesktop ? 12 : 10} />}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
         <span style={{ fontSize: isDesktop ? 20 : 15, fontWeight: 800, color: 'var(--text-primary)' }}>
           {name}
@@ -37,6 +35,7 @@ function ParticipantInfo({
 
 export default function AllResultsTab({ pairs, highlightId }: Props) {
   const isDesktop = useIsDesktop()
+  const clubColors = useClubColors()
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortOption>('team')
   const [clubFilter, setClubFilter] = useState('')
@@ -159,6 +158,7 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                   club={pair.participant_a?.club ?? null}
                   rating={pair.participant_a?.rating ?? 0}
                   isDesktop={isDesktop}
+                  clubColor={pair.participant_a?.club ? clubColors.get(pair.participant_a.club) : undefined}
                 />
                 <span style={{ color: 'var(--text-muted)', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>×</span>
                 <ParticipantInfo
@@ -166,6 +166,7 @@ export default function AllResultsTab({ pairs, highlightId }: Props) {
                   club={pair.participant_b?.club ?? null}
                   rating={pair.participant_b?.rating ?? 0}
                   isDesktop={isDesktop}
+                  clubColor={pair.participant_b?.club ? clubColors.get(pair.participant_b.club) : undefined}
                 />
               </div>
             </div>

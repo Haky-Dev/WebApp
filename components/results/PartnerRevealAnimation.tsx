@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import type { Participant } from '@/lib/types'
 import RatingBadge from '@/components/ui/RatingBadge'
+import { useClubColors } from '@/hooks/useClubColors'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props {
   partner: Participant
@@ -14,6 +16,7 @@ export default function PartnerRevealAnimation({ partner, allNames, onEnd }: Pro
   const [spinning, setSpinning] = useState(true)
   const [spinName, setSpinName] = useState('...')
   const spinInterval = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const clubColors = useClubColors()
 
   useEffect(() => {
     let speed = 60
@@ -84,8 +87,9 @@ export default function PartnerRevealAnimation({ partner, allNames, onEnd }: Pro
         {/* 파트너 정보 (공개 후) */}
         {!spinning && (
           <div style={{ marginBottom: 40, animation: 'fadeIn 0.4s ease both' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#555' }}>
-              {partner.club ? `${partner.club} · ` : ''}레이팅 <RatingBadge rating={partner.rating} fontSize={13} />
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#555', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {partner.club && <><ClubBadge name={partner.club} color={clubColors.get(partner.club)} fontSize={13} fontWeight={700} /><span>·</span></>}
+              레이팅 <RatingBadge rating={partner.rating} fontSize={13} />
             </div>
           </div>
         )}

@@ -1,5 +1,8 @@
+'use client'
 import type { Pair } from '@/lib/types'
 import RatingBadge from '@/components/ui/RatingBadge'
+import { useClubColors } from '@/hooks/useClubColors'
+import ClubBadge from '@/components/ui/ClubBadge'
 
 interface Props {
   pairs: Pair[]
@@ -7,6 +10,7 @@ interface Props {
 }
 
 export default function MyPartnerTab({ pairs, participantId }: Props) {
+  const clubColors = useClubColors()
   const myPair = participantId
     ? pairs.find(p => p.participant_a_id === participantId || p.participant_b_id === participantId)
     : null
@@ -45,8 +49,9 @@ export default function MyPartnerTab({ pairs, participantId }: Props) {
         <div style={{ fontSize: 30, fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: 5 }}>
           {partner.name}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700 }}>
-          {partner.club ? `${partner.club} · ` : ''}레이팅 <RatingBadge rating={partner.rating} fontSize={12} />
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+          {partner.club && <><ClubBadge name={partner.club} color={clubColors.get(partner.club)} fontSize={12} fontWeight={700} /><span>·</span></>}
+          레이팅 <RatingBadge rating={partner.rating} fontSize={12} />
         </div>
       </div>
     </div>
