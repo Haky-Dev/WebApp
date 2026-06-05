@@ -8,7 +8,7 @@ export default function CopyButton({ pairs }: Props) {
   const [copied, setCopied] = useState(false)
 
   function handleCopy() {
-    const header = '팀\t파트너A 이름\t파트너A 동호회\t파트너A 레이팅\t파트너B 이름\t파트너B 동호회\t파트너B 레이팅\t합산 레이팅'
+    const header = '팀\t퍼스트 이름\t퍼스트 동호회\t퍼스트 레이팅\t세컨드 이름\t세컨드 동호회\t세컨드 레이팅\t합산 레이팅'
     const rows = pairs.map(p => {
       const ratingA = p.participant_a?.rating ?? 0
       const ratingB = p.participant_b?.rating ?? 0
