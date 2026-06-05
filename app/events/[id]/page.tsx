@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import RegistrationForm from '@/components/registration/RegistrationForm'
 import { useRealtimeEvent } from '@/hooks/useRealtimeEvent'
 import type { Participant } from '@/lib/types'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 const PARTICIPANT_KEY = 'my_participant_id'
 const registeredKey = (eventId: string) => `registered_event_${eventId}`
@@ -55,9 +56,7 @@ function ParticipantCard({ p, myId }: { p: Participant; myId: string | null }) {
           {p.name}{isMe && ' ← 나'}
         </span>
       </div>
-      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
-        {p.rating}
-      </span>
+      <RatingBadge rating={p.rating} fontSize={12} />
     </div>
   )
 }

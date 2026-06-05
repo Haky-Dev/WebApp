@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import type { DrawnGroup } from '@/lib/algorithms/group-draw'
 import { useIsDesktop } from '@/hooks/useIsDesktop'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props {
   groups: DrawnGroup[]
@@ -179,8 +180,9 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
           <div style={{ fontSize: 'clamp(30px,6.5vw,86px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1 }}>
             {activeTeam?.a.name}
           </div>
-          <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, fontVariantNumeric: 'tabular-nums' }}>
-            {activeTeam?.a.club ? `${activeTeam.a.club} · ` : ''}{activeTeam?.a.rating}
+          <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6 }}>
+            {activeTeam?.a.club ? `${activeTeam.a.club} · ` : ''}
+            {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={14} />}
           </div>
 
           <div style={{ fontSize: 26, color: '#3a3a3a', fontWeight: 700, margin: '14px 0' }}>+</div>
@@ -201,8 +203,9 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
             {phase === 'idle' ? '???' : spinName}
           </div>
           {(spinVisualPhase === 'locked' || spinVisualPhase === 'locking') && activeTeam && (
-            <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6, fontVariantNumeric: 'tabular-nums' }}>
-              {activeTeam.b.club ? `${activeTeam.b.club} · ` : ''}{activeTeam.b.rating}
+            <div style={{ fontSize: 14, color: '#555', fontWeight: 700, marginTop: 6 }}>
+              {activeTeam.b.club ? `${activeTeam.b.club} · ` : ''}
+              <RatingBadge rating={activeTeam.b.rating} fontSize={14} />
             </div>
           )}
         </div>
@@ -210,7 +213,7 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
         {revealCount > 0 && (
           <div style={{ position: 'absolute', bottom: 30, left: 34, fontSize: 11, color: '#3f3f3f', fontWeight: 700, lineHeight: 1.7, textAlign: 'left' }}>
             {group.teams.slice(0, revealCount).map(t => (
-              <div key={t.label}>{t.label} · {t.a.name} ({t.a.rating}) + {t.b.name} ({t.b.rating})</div>
+              <div key={t.label}>{t.label} · {t.a.name} (<RatingBadge rating={t.a.rating} fontSize={11} />) + {t.b.name} (<RatingBadge rating={t.b.rating} fontSize={11} />)</div>
             ))}
           </div>
         )}
@@ -255,14 +258,14 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
                 {t.a.club && <div style={{ fontSize: 10, color: '#555', fontWeight: 400 }}>{t.a.club}</div>}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.a.name}</span>
-                  <span style={{ fontSize: 11, color: '#666', fontWeight: 700 }}>{t.a.rating}</span>
+                  <RatingBadge rating={t.a.rating} fontSize={11} />
                 </div>
               </div>
               <div>
                 {t.b.club && <div style={{ fontSize: 10, color: '#555', fontWeight: 400 }}>{t.b.club}</div>}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.b.name}</span>
-                  <span style={{ fontSize: 11, color: '#666', fontWeight: 700 }}>{t.b.rating}</span>
+                  <RatingBadge rating={t.b.rating} fontSize={11} />
                 </div>
               </div>
             </div>

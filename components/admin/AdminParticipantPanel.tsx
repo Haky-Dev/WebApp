@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type { Participant, Club } from '@/lib/types'
+import RatingBadge from '@/components/ui/RatingBadge'
 
 interface Props { token: string; eventId: string }
 
@@ -272,9 +273,7 @@ export default function AdminParticipantPanel({ token, eventId }: Props) {
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
-                    {p.rating}
-                  </span>
+                  <RatingBadge rating={p.rating} fontSize={12} />
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button
                       onClick={() => startEdit(p)}
