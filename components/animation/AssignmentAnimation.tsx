@@ -138,7 +138,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
 
           {/* 팀 카운터: 소형 고정 상단 영역 */}
           <div style={{ height: isDesktop ? 48 : 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: 11, letterSpacing: '3px', fontWeight: 800, color: '#39ff14', textShadow: '0 0 8px #39ff14', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 13, letterSpacing: '3px', fontWeight: 800, color: '#39ff14', textShadow: '0 0 8px #39ff14', textTransform: 'uppercase' }}>
               TEAM {String(currentTeam + 1).padStart(2, '0')} / {pairs.length}
             </div>
           </div>
@@ -156,24 +156,24 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
 
               {/* 왼쪽: 퍼스트 플레이어 */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
-                <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>FIRST</div>
-                <div style={{ fontSize: 'clamp(18px, 2.8vw, 38px)', fontWeight: 900, color: '#f1f5f9', textShadow: '0 0 20px rgba(255,255,255,0.15)', textAlign: 'center', lineHeight: 1.1 }}>
+                <div style={{ fontSize: 12, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>FIRST</div>
+                <div style={{ fontSize: 'clamp(28px, 4.5vw, 60px)', fontWeight: 900, color: '#f1f5f9', textShadow: '0 0 20px rgba(255,255,255,0.15)', textAlign: 'center', lineHeight: 1.1 }}>
                   {pairs[currentTeam]?.a.name}
                 </div>
-                <div style={{ fontSize: 11, color: '#555', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 13, color: '#555', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
                   {pairs[currentTeam]?.a.club && (
-                    <><ClubBadge name={pairs[currentTeam].a.club!} color={clubColors.get(pairs[currentTeam].a.club!)} fontSize={11} fontWeight={700} /><span>·</span></>
+                    <><ClubBadge name={pairs[currentTeam].a.club!} color={clubColors.get(pairs[currentTeam].a.club!)} fontSize={13} fontWeight={700} /><span>·</span></>
                   )}
-                  {pairs[currentTeam] && <RatingBadge rating={pairs[currentTeam].a.rating} fontSize={11} />}
+                  {pairs[currentTeam] && <RatingBadge rating={pairs[currentTeam].a.rating} fontSize={13} />}
                 </div>
               </div>
 
               {/* 구분자 */}
-              <div style={{ fontSize: isDesktop ? 22 : 16, color: '#555', fontWeight: 900, flexShrink: 0, padding: `0 ${isDesktop ? 18 : 10}px` }}>×</div>
+              <div style={{ fontSize: isDesktop ? 28 : 20, color: '#555', fontWeight: 900, flexShrink: 0, padding: `0 ${isDesktop ? 18 : 10}px` }}>×</div>
 
               {/* 오른쪽: 세컨드 슬롯머신 */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
-                <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>SECOND</div>
+                <div style={{ fontSize: 12, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>SECOND</div>
                 <div style={{
                   position: 'relative',
                   width: '100%',
@@ -201,7 +201,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                       <div key={i} style={{
                         height: ITEM_H,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 'clamp(18px, 2.5vw, 28px)',
+                        fontSize: 'clamp(28px, 4vw, 48px)',
                         fontWeight: 900,
                         color: spinState === 'locked' && i === SPIN_BEFORE ? '#39ff14' : '#e2e8f0',
                         textShadow: spinState === 'locked' && i === SPIN_BEFORE
@@ -218,14 +218,14 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                 </div>
                 {spinState === 'locked' && pairs[currentTeam] && (
                   <div style={{
-                    fontSize: 11, color: '#555', fontWeight: 700,
+                    fontSize: 13, color: '#555', fontWeight: 700,
                     display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap',
                     animation: 'slideUp 0.3s ease both',
                   }}>
                     {pairs[currentTeam].b.club && (
-                      <><ClubBadge name={pairs[currentTeam].b.club!} color={clubColors.get(pairs[currentTeam].b.club!)} fontSize={11} fontWeight={700} /><span>·</span></>
+                      <><ClubBadge name={pairs[currentTeam].b.club!} color={clubColors.get(pairs[currentTeam].b.club!)} fontSize={13} fontWeight={700} /><span>·</span></>
                     )}
-                    <RatingBadge rating={pairs[currentTeam].b.rating} fontSize={11} />
+                    <RatingBadge rating={pairs[currentTeam].b.rating} fontSize={13} />
                   </div>
                 )}
               </div>
@@ -253,13 +253,13 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                     minWidth: isDesktop ? 200 : 130,
                     animation: 'slideUp 0.4s ease both',
                   }}>
-                    <div style={{ fontSize: isDesktop ? 13 : 10, fontWeight: 800, color: teamColor(i), letterSpacing: '2px', marginBottom: isDesktop ? 6 : 3 }}>
+                    <div style={{ fontSize: isDesktop ? 15 : 12, fontWeight: 800, color: teamColor(i), letterSpacing: '2px', marginBottom: isDesktop ? 6 : 3 }}>
                       팀 {i + 1}
                     </div>
-                    <div style={{ fontSize: isDesktop ? 20 : 13, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
+                    <div style={{ fontSize: isDesktop ? 24 : 16, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
                       {p.a.name} <span style={{ color: '#333', margin: '0 3px', fontWeight: 700 }}>×</span> {p.b.name}
                     </div>
-                    <div style={{ fontSize: isDesktop ? 12 : 10, color: '#444', marginTop: isDesktop ? 5 : 2 }}>
+                    <div style={{ fontSize: isDesktop ? 13 : 11, color: '#444', marginTop: isDesktop ? 5 : 2 }}>
                       합산 {combined}
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
         <>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 80% 0%, rgba(255,45,120,0.18), transparent 50%), radial-gradient(ellipse at 10% 100%, rgba(57,255,20,0.15), transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.07), transparent 60%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: isDesktop ? 900 : 480, padding: '0 24px' }}>
-            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#555', letterSpacing: '2px', marginBottom: 20, textTransform: 'uppercase' }}>
+            <div style={{ textAlign: 'center', fontSize: 15, fontWeight: 700, color: '#555', letterSpacing: '2px', marginBottom: 20, textTransform: 'uppercase' }}>
               배정 완료!
             </div>
             <div style={isDesktop
@@ -293,25 +293,25 @@ export default function AssignmentAnimation({ pairs, onEnd }: Props) {
                     boxShadow: `0 0 12px ${teamColorRgba(i)}`,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: teamColor(i), textShadow: `0 0 8px ${teamColor(i)}` }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: teamColor(i), textShadow: `0 0 8px ${teamColor(i)}` }}>
                         팀 {i + 1}
                       </div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#555' }}>합산 {combined}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#555' }}>합산 {combined}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ flex: 1 }}>
-                        {p.a.club && <ClubBadge name={p.a.club} color={clubColors.get(p.a.club)} fontSize={11} />}
+                        {p.a.club && <ClubBadge name={p.a.club} color={clubColors.get(p.a.club)} fontSize={13} />}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                          <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.a.name}</span>
-                          <RatingBadge rating={p.a.rating} fontSize={12} />
+                          <span style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 900, color: '#f1f5f9' }}>{p.a.name}</span>
+                          <RatingBadge rating={p.a.rating} fontSize={14} />
                         </div>
                       </div>
                       <span style={{ color: '#444', fontWeight: 700, flexShrink: 0 }}>×</span>
                       <div style={{ flex: 1 }}>
-                        {p.b.club && <ClubBadge name={p.b.club} color={clubColors.get(p.b.club)} fontSize={11} />}
+                        {p.b.club && <ClubBadge name={p.b.club} color={clubColors.get(p.b.club)} fontSize={13} />}
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                          <span style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 900, color: '#f1f5f9' }}>{p.b.name}</span>
-                          <RatingBadge rating={p.b.rating} fontSize={12} />
+                          <span style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 900, color: '#f1f5f9' }}>{p.b.name}</span>
+                          <RatingBadge rating={p.b.rating} fontSize={14} />
                         </div>
                       </div>
                     </div>

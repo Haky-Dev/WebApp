@@ -190,7 +190,7 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
               }}
             >
               <span style={{ fontSize: isDesktop ? 'clamp(36px,5vw,80px)' : 'clamp(36px,5vw,64px)', fontWeight: 900, color: done[i] ? '#888' : colorFor(i), textShadow: done[i] ? 'none' : `0 0 16px ${colorFor(i)}` }}>{g.letter}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#888' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#888' }}>
                 {done[i] ? '✓ 완료' : `${g.teams.length}팀 · 추첨 대기`}
               </span>
             </button>
@@ -231,24 +231,24 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
 
             {/* 왼쪽: 퍼스트 플레이어 */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
-              <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>FIRST</div>
-              <div style={{ fontSize: 'clamp(18px, 2.8vw, 38px)', fontWeight: 900, color: '#f1f5f9', textAlign: 'center', lineHeight: 1.1, letterSpacing: -1 }}>
+              <div style={{ fontSize: 12, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>FIRST</div>
+              <div style={{ fontSize: 'clamp(28px, 4.5vw, 60px)', fontWeight: 900, color: '#f1f5f9', textAlign: 'center', lineHeight: 1.1, letterSpacing: -1 }}>
                 {activeTeam?.a.name}
               </div>
-              <div style={{ fontSize: 11, color: '#555', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 13, color: '#555', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
                 {activeTeam?.a.club && (
-                  <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={11} fontWeight={700} /><span>·</span></>
+                  <><ClubBadge name={activeTeam.a.club} color={clubColors.get(activeTeam.a.club)} fontSize={13} fontWeight={700} /><span>·</span></>
                 )}
-                {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={11} />}
+                {activeTeam && <RatingBadge rating={activeTeam.a.rating} fontSize={13} />}
               </div>
             </div>
 
             {/* 구분자 */}
-            <div style={{ fontSize: isDesktop ? 22 : 16, color: '#555', fontWeight: 900, flexShrink: 0, padding: `0 ${isDesktop ? 18 : 10}px` }}>×</div>
+            <div style={{ fontSize: isDesktop ? 28 : 20, color: '#555', fontWeight: 900, flexShrink: 0, padding: `0 ${isDesktop ? 18 : 10}px` }}>×</div>
 
             {/* 오른쪽: 세컨드 슬롯머신 */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isDesktop ? 8 : 5 }}>
-              <div style={{ fontSize: 10, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>SECOND</div>
+              <div style={{ fontSize: 12, letterSpacing: '2px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' }}>SECOND</div>
               <div style={{
                 position: 'relative',
                 width: '100%',
@@ -276,7 +276,7 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
                     <div key={i} style={{
                       height: ITEM_H,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 'clamp(18px, 2.5vw, 26px)',
+                      fontSize: 'clamp(28px, 4vw, 46px)',
                       fontWeight: 900,
                       color: phase === 'locked' && i === SPIN_BEFORE
                         ? groupColor
@@ -295,14 +295,14 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
               </div>
               {phase === 'locked' && activeTeam && (
                 <div style={{
-                  fontSize: 11, color: '#555', fontWeight: 700,
+                  fontSize: 13, color: '#555', fontWeight: 700,
                   display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center', flexWrap: 'wrap',
                   animation: 'slideUp 0.3s ease both',
                 }}>
                   {activeTeam.b.club && (
-                    <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={11} fontWeight={700} /><span>·</span></>
+                    <><ClubBadge name={activeTeam.b.club} color={clubColors.get(activeTeam.b.club)} fontSize={13} fontWeight={700} /><span>·</span></>
                   )}
-                  <RatingBadge rating={activeTeam.b.rating} fontSize={11} />
+                  <RatingBadge rating={activeTeam.b.rating} fontSize={13} />
                 </div>
               )}
             </div>
@@ -345,13 +345,13 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
                   minWidth: isDesktop ? 200 : 130,
                   animation: 'slideUp 0.4s ease both',
                 }}>
-                  <div style={{ fontSize: isDesktop ? 13 : 10, fontWeight: 800, color: groupColor, letterSpacing: '2px', marginBottom: isDesktop ? 6 : 3 }}>
+                  <div style={{ fontSize: isDesktop ? 15 : 12, fontWeight: 800, color: groupColor, letterSpacing: '2px', marginBottom: isDesktop ? 6 : 3 }}>
                     {t.label}
                   </div>
-                  <div style={{ fontSize: isDesktop ? 20 : 13, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
+                  <div style={{ fontSize: isDesktop ? 24 : 16, fontWeight: 900, color: '#f1f5f9', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
                     {t.a.name} <span style={{ color: '#333', margin: '0 3px', fontWeight: 700 }}>×</span> {t.b.name}
                   </div>
-                  <div style={{ fontSize: isDesktop ? 12 : 10, color: '#444', marginTop: isDesktop ? 5 : 2 }}>합산 {combined}</div>
+                  <div style={{ fontSize: isDesktop ? 13 : 11, color: '#444', marginTop: isDesktop ? 5 : 2 }}>합산 {combined}</div>
                 </div>
               )
             })}
@@ -376,21 +376,21 @@ export default function GroupDrawCeremony({ groups, publishing, onPublish }: Pro
           return (
             <div key={t.label} style={{ border: `1px solid ${colorFor(gi)}`, borderRadius: 9, padding: '11px 13px', boxShadow: `0 0 12px ${colorFor(gi)}22`, animation: 'slideUp 0.4s ease both' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1, color: colorFor(gi) }}>{t.label}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#555' }}>{combined}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, color: colorFor(gi) }}>{t.label}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#555' }}>{combined}</div>
               </div>
               <div style={{ marginBottom: 2 }}>
-                {t.a.club && <ClubBadge name={t.a.club} color={clubColors.get(t.a.club)} fontSize={10} />}
+                {t.a.club && <ClubBadge name={t.a.club} color={clubColors.get(t.a.club)} fontSize={12} />}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                  <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.a.name}</span>
-                  <RatingBadge rating={t.a.rating} fontSize={11} />
+                  <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: -0.4 }}>{t.a.name}</span>
+                  <RatingBadge rating={t.a.rating} fontSize={13} />
                 </div>
               </div>
               <div>
-                {t.b.club && <ClubBadge name={t.b.club} color={clubColors.get(t.b.club)} fontSize={10} />}
+                {t.b.club && <ClubBadge name={t.b.club} color={clubColors.get(t.b.club)} fontSize={12} />}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                  <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: -0.4 }}>{t.b.name}</span>
-                  <RatingBadge rating={t.b.rating} fontSize={11} />
+                  <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: -0.4 }}>{t.b.name}</span>
+                  <RatingBadge rating={t.b.rating} fontSize={13} />
                 </div>
               </div>
             </div>
